@@ -1,0 +1,56 @@
+.acessorios-vitrine {
+  padding: 120px var(--gut-d) 80px var(--gut-e);
+  background: #f3f2ef;
+  color: #262622;
+  min-height: 100svh;
+}
+.acessorios-cab { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 34px; }
+.acessorios-cab h1 { margin: 0 0 12px; font: 600 clamp(40px, 5.3vw, 76px)/1 var(--display); letter-spacing: -.04em; }
+.acessorios-cab p { margin: 0; font-size: 16px; color: #66665e; }
+.acessorios-contagem { font-size: 12px; color: #66665e; white-space: nowrap; padding-bottom: 3px; }
+.acessorios-filtros { padding: 18px 0; border-block: 1px solid #d9d8d1; margin-bottom: 30px; --fb-tinta: #262622; --fb-fundo: #f3f2ef; }
+.acessorios-filtros .fb { justify-content: space-between; }
+.acessorios-colecao { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 40px 22px; }
+.acessorios-colecao .card { width: auto; max-width: none; color: #262622; }
+.acessorios-colecao .card-peca { aspect-ratio: 1 / 1.08; padding: 15%; background: #e7e7e1; transform: none; }
+.acessorios-colecao .card:nth-child(4n+2) .card-peca { background: #ebe7df; }
+.acessorios-colecao .card:nth-child(4n+3) .card-peca { background: #e3e5e1; }
+.acessorios-colecao .card-peca::after { display: none; }
+.acessorios-colecao .card-peca .arte { filter: drop-shadow(0 9px 8px #28282018); transition: transform .45s var(--curva-saida); }
+.acessorios-colecao .card-peca:hover .arte { transform: scale(1.045); }
+.acessorios-colecao .card-peca .foto img { object-position: center; }
+.acessorios-colecao [data-card="relogio"] .card-peca { padding: 18% 25%; }
+.acessorios-colecao [data-card="colar"] .card-peca { padding: 22%; }
+.acessorios-colecao [data-card="oculos"] .card-peca { padding: 12%; }
+.acessorios-colecao [data-card="tote"] .card-peca,
+.acessorios-colecao [data-card="mochila"] .card-peca { padding: 12% 18%; }
+.acessorios-colecao [data-card="tote"] .card-peca .arte { transform: scale(1.45); }
+.acessorios-colecao [data-card="tote"] .card-peca:hover .arte { transform: scale(1.5); }
+.acessorios-colecao .card-info { padding-top: 14px; gap: 7px 8px; }
+.acessorios-colecao .card-nome { font-size: 14px; font-weight: 500; }
+.acessorios-colecao .card-preco { font-size: 13px; }
+.acessorios-colecao .card-preco b { font-weight: 500; }
+.acessorios-colecao .card .bolinhas { opacity: 1; padding: 2px; gap: 5px; }
+.acessorios-colecao .card .bolinha { width: 18px; height: 18px; }
+.acessorios-colecao .selo { margin: 12px; padding: 4px 7px; font: 500 10px var(--corpo); }
+@media (max-width: 1000px) {
+  .acessorios-colecao { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px 18px; }
+  .acessorios-filtros .fb { justify-content: start; }
+}
+@media (max-width: 640px) {
+  .acessorios-vitrine { padding-top: 156px; padding-bottom: 48px; }
+  .acessorios-cab { margin-bottom: 26px; gap: 12px; }
+  .acessorios-cab h1 { font-size: 44px; }
+  .acessorios-cab p { max-width: 230px; font-size: 14px; line-height: 1.4; }
+  .acessorios-contagem { font-size: 10px; }
+  .acessorios-filtros { padding-block: 14px; margin-bottom: 22px; }
+  .acessorios-colecao { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 12px; }
+  .acessorios-colecao .card-info { grid-template-columns: minmax(0, 1fr); gap: 4px; padding-top: 11px; }
+  .acessorios-colecao .card-preco { text-align: left; font-size: 12px; }
+  .acessorios-colecao .card-preco s { display: inline; margin-right: 4px; }
+  .acessorios-colecao .card-nome { font-size: 13px; }
+  .acessorios-colecao .card .bolinha { width: 16px; height: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .acessorios-colecao .card-peca .arte { transition: none; }
+}

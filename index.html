@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}body{margin:0;font:14px system-ui}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Hypex Roupas</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231A1A1C'/%3E%3Cpath transform='translate(9 13.5) scale(1.3)' fill='%23E8541E' d='M0 0H9L14 8L20 -2H30L19 14L28 27H19L14 19L9 27H0L9 14Z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600;700&family=Unbounded:wght@500;700;900&display=swap">
+<link rel="stylesheet" href="css/estilo.css?v=16">
+<link rel="stylesheet" href="css/movimento.css?v=18">
+<link rel="stylesheet" href="css/efeitos.css">
+<link rel="stylesheet" href="css/tenis.css?v=15">
+</head>
+<body>
+
+<!-- Sombras compartilhadas: aplicadas por cima da cor de cada peça -->
+<svg class="defs" width="0" height="0" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="s-v" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".16"/>
+      <stop offset=".45" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000" stop-opacity=".2"/>
+    </linearGradient>
+    <linearGradient id="s-h" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#000" stop-opacity=".24"/>
+      <stop offset=".3" stop-color="#000" stop-opacity="0"/>
+      <stop offset=".55" stop-color="#fff" stop-opacity=".07"/>
+      <stop offset="1" stop-color="#000" stop-opacity=".24"/>
+    </linearGradient>
+    <radialGradient id="s-bojo" cx=".4" cy=".32" r=".8">
+      <stop offset="0" stop-color="#fff" stop-opacity=".2"/>
+      <stop offset=".55" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000" stop-opacity=".26"/>
+    </radialGradient>
+    <linearGradient id="s-brilho" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".26"/>
+      <stop offset=".5" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000" stop-opacity=".1"/>
+    </linearGradient>
+    <linearGradient id="s-sola" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".3"/>
+      <stop offset="1" stop-color="#000" stop-opacity=".16"/>
+    </linearGradient>
+    <linearGradient id="s-vidro" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".85"/>
+      <stop offset=".35" stop-color="#fff" stop-opacity=".12"/>
+      <stop offset=".75" stop-color="#000" stop-opacity=".12"/>
+      <stop offset="1" stop-color="#fff" stop-opacity=".5"/>
+    </linearGradient>
+    <linearGradient id="s-metal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F7F8FB"/>
+      <stop offset=".35" stop-color="#9EA3B2"/>
+      <stop offset=".55" stop-color="#EEF0F5"/>
+      <stop offset="1" stop-color="#7C8091"/>
+    </linearGradient>
+    <linearGradient id="s-lente" x1="0" y1="0" x2=".7" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".5"/>
+      <stop offset=".4" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000" stop-opacity=".22"/>
+    </linearGradient>
+    <pattern id="p-tela" width="7" height="7" patternUnits="userSpaceOnUse">
+      <circle cx="1.8" cy="1.8" r="1.25" fill="#000" fill-opacity=".3"/><circle cx="5.3" cy="5.3" r="1.25" fill="#000" fill-opacity=".3"/>
+      <circle cx="1.5" cy="1.3" r=".55" fill="#fff" fill-opacity=".28"/><circle cx="5" cy="4.8" r=".55" fill="#fff" fill-opacity=".28"/>
+    </pattern>
+    <pattern id="p-tricot" width="6" height="5" patternUnits="userSpaceOnUse">
+      <path d="M0 3.6 3 1.2 6 3.6" fill="none" stroke="#000" stroke-opacity=".2" stroke-width="1"/>
+      <path d="M0 4.6 3 2.2 6 4.6" fill="none" stroke="#fff" stroke-opacity=".2" stroke-width=".7"/>
+    </pattern>
+    <pattern id="p-sarja" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(38)">
+      <path d="M0 2.5H5" stroke="#000" stroke-opacity=".12" stroke-width="1.3"/>
+      <path d="M0 4H5" stroke="#fff" stroke-opacity=".1" stroke-width=".8"/>
+    </pattern>
+    <pattern id="p-canelado" width="5" height="5" patternUnits="userSpaceOnUse">
+      <path d="M1.5 0V5" stroke="#000" stroke-opacity=".17" stroke-width="1.5"/>
+      <path d="M3.4 0V5" stroke="#fff" stroke-opacity=".12" stroke-width="1"/>
+    </pattern>
+
+    <!-- Materiais: luz vinda de cima à esquerda, relevo pela silhueta e grão do tecido -->
+    <filter id="f-malha" x="-4%" y="-4%" width="108%" height="108%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="1.15" numOctaves="2" seed="3" result="r"/>
+      <feColorMatrix in="r" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .7 0 0 0 0" result="ra"/>
+      <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="sa"/>
+      <feComposite in="sa" in2="ra" operator="arithmetic" k1="0" k2="1" k3=".09" k4="0" result="relevo"/>
+      <feDiffuseLighting in="relevo" surfaceScale="4.5" diffuseConstant="1.42" lighting-color="#fff" result="luz"><feDistantLight azimuth="235" elevation="45"/></feDiffuseLighting>
+      <feBlend in="SourceGraphic" in2="luz" mode="multiply" result="base"/>
+      <feComposite in="base" in2="SourceAlpha" operator="in"/>
+    </filter>
+    <filter id="f-nylon" x="-4%" y="-4%" width="108%" height="108%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="7" result="relevo"/>
+      <feDiffuseLighting in="relevo" surfaceScale="6" diffuseConstant="1.42" lighting-color="#fff" result="luz"><feDistantLight azimuth="235" elevation="45"/></feDiffuseLighting>
+      <feBlend in="SourceGraphic" in2="luz" mode="multiply" result="base"/>
+      <feSpecularLighting in="relevo" surfaceScale="6" specularConstant=".62" specularExponent="26" lighting-color="#fff" result="bri"><feDistantLight azimuth="235" elevation="45"/></feSpecularLighting>
+      <feComposite in="base" in2="bri" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="tudo"/>
+      <feComposite in="tudo" in2="SourceAlpha" operator="in"/>
+    </filter>
+    <filter id="f-couro" x="-4%" y="-4%" width="108%" height="108%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency=".55" numOctaves="2" seed="8" result="r"/>
+      <feColorMatrix in="r" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .7 0 0 0 0" result="ra"/>
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4.5" result="sa"/>
+      <feComposite in="sa" in2="ra" operator="arithmetic" k1="0" k2="1" k3=".07" k4="0" result="relevo"/>
+      <feDiffuseLighting in="relevo" surfaceScale="4.5" diffuseConstant="1.42" lighting-color="#fff" result="luz"><feDistantLight azimuth="235" elevation="45"/></feDiffuseLighting>
+      <feBlend in="SourceGraphic" in2="luz" mode="multiply" result="base"/>
+      <feSpecularLighting in="relevo" surfaceScale="4.5" specularConstant=".42" specularExponent="30" lighting-color="#fff" result="bri"><feDistantLight azimuth="235" elevation="45"/></feSpecularLighting>
+      <feComposite in="base" in2="bri" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="tudo"/>
+      <feComposite in="tudo" in2="SourceAlpha" operator="in"/>
+    </filter>
+    <filter id="f-solido" x="-4%" y="-6%" width="108%" height="112%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="relevo"/>
+      <feDiffuseLighting in="relevo" surfaceScale="2.6" diffuseConstant="1.42" lighting-color="#fff" result="luz"><feDistantLight azimuth="250" elevation="45"/></feDiffuseLighting>
+      <feBlend in="SourceGraphic" in2="luz" mode="multiply" result="base"/>
+      <feSpecularLighting in="relevo" surfaceScale="2.6" specularConstant=".5" specularExponent="30" lighting-color="#fff" result="bri"><feDistantLight azimuth="250" elevation="45"/></feSpecularLighting>
+      <feComposite in="base" in2="bri" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="tudo"/>
+      <feComposite in="tudo" in2="SourceAlpha" operator="in"/>
+    </filter>
+    <filter id="f-camada" x="-6%" y="-6%" width="112%" height="114%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1.3" result="relevo"/>
+      <feDiffuseLighting in="relevo" surfaceScale="1.5" diffuseConstant="1.42" lighting-color="#fff" result="luz"><feDistantLight azimuth="235" elevation="45"/></feDiffuseLighting>
+      <feBlend in="SourceGraphic" in2="luz" mode="multiply" result="base"/>
+      <feComposite in="base" in2="SourceAlpha" operator="in" result="peca"/>
+      <feOffset in="SourceAlpha" dx="0" dy="1.6" result="o"/>
+      <feGaussianBlur in="o" stdDeviation="1.6" result="ob"/>
+      <feColorMatrix in="ob" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .38 0" result="sombra"/>
+      <feMerge><feMergeNode in="sombra"/><feMergeNode in="peca"/></feMerge>
+    </filter>
+    <filter id="f-dobra" x="-15%" y="-15%" width="130%" height="130%"><feGaussianBlur stdDeviation="3.4"/></filter>
+    <filter id="f-sombra" x="-15%" y="-15%" width="130%" height="130%"><feGaussianBlur stdDeviation="7"/></filter>
+  </defs>
+</svg>
+
+<div id="intro" aria-hidden="true">
+  <div class="intro-marca"><span style="--i:0">H</span><span style="--i:1">Y</span><span style="--i:2">P</span><span style="--i:3">E</span><span style="--i:4">X</span></div>
+  <span class="intro-sub">Roupas</span>
+  <span class="intro-num">000</span>
+</div>
+
+<div id="miolo">
+  <header class="topo">
+    <a class="logo" href="#inicio" aria-label="Hypex Roupas, página inicial">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M3 8h10l7 11L27 6h11L25.500 24 38 39H26.500L20 29l-6.500 10H2l12.500-15z" fill="currentColor"/><path d="M27 6h11L25.500 24 20 19z" fill="#E8541E"/></svg>
+      <span class="logo-texto"><span>HYPEX</span><small>roupas</small></span>
+    </a>
+    <nav class="topo-deps" aria-label="Departamentos">
+      <a href="#loja">Loja</a>
+      <a href="#tenis">Tênis</a>
+      <a href="#roupas">Roupas</a>
+      <a href="#casacos">Casacos</a>
+      <a href="#meias">Meias</a>
+      <a href="#intima">Íntima</a>
+    </nav>
+    <div class="topo-acoes">
+      <button type="button" class="topo-botao" id="btn-busca" aria-label="Buscar peças"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>
+      <button type="button" class="topo-botao topo-sacola" id="btn-sacola" aria-label="Abrir sacola"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l1.2 13H3.8z"/><path d="M9 11V6a3 3 0 016 0v5"/></svg><span class="topo-sacola-txt">Sacola</span><span id="contador" class="contador">0</span></button>
+    </div>
+  </header>
+
+  <main id="app"></main>
+
+  <footer class="rodape" data-tom="escuro">
+    <div class="rodape-inner">
+      <div class="rodape-colunas">
+        <div>
+          <h2 class="mono">Departamentos</h2>
+          <ul><li><a href="#tenis">Tênis</a></li><li><a href="#roupas">Roupas</a></li><li><a href="#casacos">Casacos</a></li><li><a href="#meias">Meias</a></li><li><a href="#intima">Roupa íntima</a></li></ul>
+        </div>
+        <div>
+          <h2 class="mono">Estilos</h2>
+          <ul><li><a href="#estilo-street">Street</a></li><li><a href="#estilo-casual">Casual</a></li><li><a href="#estilo-esporte">Esporte</a></li><li><a href="#estilo-alfaiataria">Alfaiataria</a></li><li><a href="#estilo-praia">Praia</a></li></ul>
+        </div>
+        <div>
+          <h2 class="mono">Pagamento</h2>
+          <ul class="rodape-texto"><li>Pix com 5% de desconto</li><li>Crédito em até 6x sem juros</li><li>Débito</li><li>Boleto</li></ul>
+        </div>
+        <div>
+          <h2 class="mono">Sobre este site</h2>
+          <p class="rodape-texto">Loja fictícia de demonstração. As compras são simuladas e nenhum valor é cobrado.</p>
+        </div>
+      </div>
+      <p class="rodape-marca" aria-hidden="true">HYPEX</p>
+    </div>
+  </footer>
+</div>
+
+<div id="sombra" class="sombra" hidden></div>
+<aside id="sacola" class="sacola" role="dialog" aria-modal="true" aria-labelledby="titulo-sacola" hidden>
+  <div class="sacola-cab">
+    <h2 id="titulo-sacola" class="titulo-pequeno">Sua sacola</h2>
+    <button type="button" class="redondo" id="fechar-sacola" data-fechar-sacola aria-label="Fechar sacola"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+  </div>
+  <div id="sacola-corpo" class="sacola-corpo"></div>
+</aside>
+
+<div id="busca" class="busca" role="dialog" aria-modal="true" aria-label="Buscar peças" hidden>
+  <form id="form-busca" class="busca-form" role="search">
+    <label for="busca-campo" class="mono">Buscar na loja</label>
+    <div class="busca-linha">
+      <input id="busca-campo" type="search" autocomplete="off" placeholder="Peça, cor ou estilo">
+      <button type="button" class="redondo" data-fechar-busca aria-label="Fechar busca"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+    </div>
+  </form>
+  <div id="busca-res" class="busca-res"></div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="js/arte.js"></script>
+<script src="js/catalogo.js?v=14"></script>
+<script src="js/movimento.js?v=18"></script>
+<script src="js/seletor.js"></script><script src="js/app.js?v=18"></script>
+
+</body>
+</html>

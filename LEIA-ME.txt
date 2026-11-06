@@ -1,0 +1,20 @@
+﻿HYPEX ROUPAS E ACESSÓRIOS
+
+Como abrir
+1. Descompacte esta pasta.
+2. Dê dois cliques em index.html.
+
+Como publicar
+Envie a pasta inteira para qualquer hospedagem de site estático
+(Netlify, Vercel, GitHub Pages ou a sua hospedagem). Não precisa de servidor nem de banco de dados.
+
+Como editar
+- Produtos, preços, cores e cupons: js/catalogo.js
+- Telas e comportamento: js/app.js
+- Visual: pasta css
+- Fotos: pasta img (grandes) e img/p (leves). Para trocar uma foto, mantenha o mesmo nome de arquivo.
+
+Importante
+- O checkout é simulado: nenhum pagamento é cobrado e nenhum pedido é enviado.
+- As fotos de produto foram geradas por IA. Para vender de verdade, troque por fotos reais das peças.
+- As fontes vêm do Google Fonts, então precisam de internet para aparecer iguais.

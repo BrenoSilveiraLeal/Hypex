@@ -1,0 +1,144 @@
+/* Composição de referência: ascentastudio.com/last-dept/.
+   A fotografia contém parede, tênis, prateleiras e suas sombras. */
+.cena-voltar {
+  position: absolute;
+  top: 82px;
+  left: var(--gut-e);
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 24px;
+  background: #f3f2ef;
+  color: #262622;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.cena-voltar .ico { width: 16px; height: 16px; }
+.cena-voltar:hover { background: #fff; }
+.cena:has(.cena-voltar) .cena-info { top: 148px; }
+@media (max-width: 860px) {
+  .cena-voltar { top: 126px; left: 20px; font-size: 12px; }
+}
+.parede-tenis, .cena-tenis {
+  background: #353330 url('../img/tenis-textura.webp') center / cover;
+  height: max(100svh, 560px);
+  padding: 0;
+  overflow: hidden;
+  color: #f0ece5;
+}
+.parede-tenis::before, .parede-tenis::after,
+.cena-tenis::before, .cena-tenis .camera::before { display: none; }
+.tenis-panorama, .cena-tenis .pagina.tenis-panorama {
+  position: absolute;
+  top: calc(50% - 27.907vw);
+  left: 0;
+  width: 100vw;
+  height: 55.814vw;
+  padding: 0;
+}
+.tenis-parede, .cena-tenis .nichos {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  margin: 0;
+  translate: none;
+}
+.tenis-fotografia { position: absolute; inset: 0; display: block; pointer-events: none; transition: opacity .65s; }
+.tenis-fotografia img { display: block; width: 100%; height: 100%; }
+.tenis-aproximacao {
+  position: absolute;
+  width: 25%;
+  height: 25%;
+  max-width: none;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .2s;
+  mask-image: linear-gradient(to right, transparent, #000 3%, #000 97%, transparent), linear-gradient(to bottom, transparent, #000 6%, #000 90%, transparent);
+  mask-composite: intersect;
+}
+.tenis-aproximacao.pronta { opacity: 1; }
+.tenis-parede .tenis-modelo {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--largura);
+  height: 16.4%;
+  margin: 0;
+  opacity: 1;
+  filter: none;
+}
+.tenis-parede .nicho-peca { width: 100%; height: 100%; aspect-ratio: auto; margin: 0; transform: none; }
+.tenis-parede .nicho-peca .arte { opacity: 0; animation: none; transition: opacity .45s; }
+.tenis-parede .suporte { position: absolute; top: 100%; width: 100%; height: 4px; opacity: 0; transition: opacity .2s; }
+.tenis-parede .suporte::after { display: none; }
+.tenis-parede .vidro { background: #f5d7b3; box-shadow: 0 4px 18px 4px #e99c5b66; }
+.tenis-modelo:hover .suporte, .tenis-modelo:focus-visible .suporte { opacity: 1; }
+.tenis-parede .plaquinha {
+  position: absolute;
+  top: calc(100% + 18px);
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  padding: 0;
+  opacity: 0;
+  text-align: center;
+  transition: opacity .2s;
+}
+.tenis-parede .plaquinha-nome { font-size: 10px; color: #e8bf98; }
+.tenis-parede .plaquinha-preco { font-size: 9px; color: #e8dfd2; }
+.tenis-modelo:hover .plaquinha, .tenis-modelo:focus-visible .plaquinha { opacity: 1; }
+.parede-tenis .parede-cab { position: absolute; inset: 112px var(--gut-d) auto var(--gut-e); z-index: 3; width: auto; max-width: none; padding: 0; margin: 0; pointer-events: none; }
+.parede-tenis .parede-cab .mono, .cena-tenis .cena-titulo .mono { color: #d5bfa8; font-size: 8px; letter-spacing: .17em; margin-bottom: 13px; opacity: 1; }
+.parede-tenis .titulo, .cena-tenis .cena-titulo h1 { font: 500 29px/1.1 var(--display); letter-spacing: -.04em; }
+.parede-tenis .link-parede { position: absolute; right: 0; top: calc(max(100svh, 560px) - 160px); pointer-events: auto; font-size: 11px; font-weight: 400; }
+.cena-tenis .cena-titulo { top: 112px; }
+.cena-tenis .cena-trilho { width: 100%; height: 100%; }
+.cena-tenis .cena-rodape { bottom: 22px; grid-template-columns: 1fr auto; font-size: 8px; }
+.cena-tenis .cena-rodape > button { display: none; }
+.cena-tenis .cena-dica { margin-right: 135px; }
+.cena-tenis .tenis-filtros { top: auto; bottom: 20px; max-width: calc(100% - 48px); font-size: 10px; }
+.tenis-filtros summary { cursor: pointer; min-height: 28px; display: flex; align-items: center; justify-content: end; text-decoration: underline; text-underline-offset: 4px; }
+.tenis-filtros[open] { padding: 16px; background: #292725; }
+.tenis-filtros[open] summary { margin-bottom: 14px; }
+.cena-tenis.foco .tenis-fotografia { opacity: 1; }
+.cena-tenis.foco .nicho.atual .nicho-peca .arte { opacity: 0; }
+.cena-tenis.foco .nicho.atual .suporte { opacity: 0; }
+
+@media (max-width: 860px) {
+  .parede-tenis, .cena-tenis { height: auto; min-height: 0; padding: 216px 0 58px; background-size: 100vw auto; }
+  .parede-tenis .tenis-panorama, .cena-tenis .pagina.tenis-panorama {
+    position: relative;
+    inset: auto;
+    width: 100% !important;
+    height: 214.286vw !important;
+    padding: 0 !important;
+  }
+  .tenis-parede .tenis-modelo { left: var(--xm); top: var(--ym); width: 50%; height: 20%; }
+  .tenis-parede .nicho-peca { height: 80%; }
+  .tenis-parede .suporte { top: 70%; width: 78%; }
+  .tenis-parede .plaquinha { top: auto; bottom: 4%; display: flex; flex-direction: row; justify-content: space-between; padding: 0 18px; gap: 8px; opacity: 1; transform: none; }
+  .tenis-parede .plaquinha-nome, .tenis-parede .plaquinha-preco { font-size: 10px; letter-spacing: 0; text-transform: none; margin: 0; color: #ede6db; }
+  .parede-tenis .parede-cab { inset: 128px 22px auto; }
+  .parede-tenis .titulo, .cena-tenis .cena-titulo h1 { font-size: 29px; max-width: 280px; }
+  .parede-tenis .parede-cab .link-parede { position: absolute; top: auto; bottom: -42px; left: 0; right: auto; visibility: visible; font-size: 10px; }
+  .cena-tenis .cena-titulo { top: 132px; left: 22px; }
+  .cena-tenis .camera { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .cena-tenis .cena-janela { height: 214.286vw; }
+  .cena-tenis .cena-trilho { height: 100% !important; }
+  .cena-tenis .cena-dica { display: none; }
+  .cena-tenis .cena-rodape { position: absolute; bottom: 12px; font-size: 8px; }
+  .cena-tenis .tenis-filtros { top: auto; left: auto; right: 22px; bottom: 12px; }
+  .cena-tenis.foco { padding: 0; }
+  .cena-tenis.foco .cena-janela { height: calc(112px + 72vw); }
+  .cena-tenis.foco .tenis-modelo:not(.atual) { visibility: hidden; }
+  .cena-tenis.foco .tenis-parede .plaquinha { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tenis-fotografia, .tenis-aproximacao, .tenis-parede .nicho-peca .arte, .tenis-parede .plaquinha { transition: none; }
+}
