@@ -297,10 +297,34 @@ window.Mov = (function () {
     c.classList.toggle('virado', e.target.id === 'ck-pag-cvv');
   });
 
-  /* gira a peça ao trocar de cor ou modelo */
-  function trocaPeca(el) {
-    if (!el || calmo()) return;
-    el.animate([{ transform: 'perspective(900px) rotateY(-55deg) scale(.9)', opacity: .15, filter: 'blur(4px)' }, { transform: 'none', opacity: 1, filter: 'blur(0)' }], { duration: 640, easing: EASE });
+  /* Troca a imagem de perfil, no meio do giro, sem espelhar a frente. */
+  const trocas = new WeakMap();
+  function trocaPeca(caixa, atualizar, animar = true) {
+    if (!caixa) return;
+    const anterior = trocas.get(caixa), imagem = $('.arte', caixa);
+    const inicio = imagem ? getComputedStyle(imagem).transform : 'none';
+    if (anterior) anterior.animacao.cancel();
+    trocas.delete(caixa);
+    if (!animar || calmo() || !imagem || imagem.classList.contains('costas-pendente')) { atualizar(); return; }
+    const estado = {};
+    trocas.set(caixa, estado);
+    const valido = () => caixa.isConnected && trocas.get(caixa) === estado;
+    estado.animacao = imagem.animate([
+      { transform: inicio, transformOrigin: '50% 8%' },
+      { transform: 'perspective(1000px) rotateY(90deg)', transformOrigin: '50% 8%' }
+    ], { duration: 240, easing: 'cubic-bezier(.55,0,1,.45)', fill: 'forwards' });
+    estado.animacao.onfinish = () => {
+      if (!valido()) return;
+      atualizar();
+      estado.animacao.cancel();
+      const nova = $('.arte', caixa);
+      if (!nova) { trocas.delete(caixa); return; }
+      estado.animacao = nova.animate([
+        { transform: 'perspective(1000px) rotateY(-90deg)', transformOrigin: '50% 8%' },
+        { transform: 'perspective(1000px) rotateY(0deg)', transformOrigin: '50% 8%' }
+      ], { duration: 380, easing: EASE });
+      estado.animacao.onfinish = () => { if (trocas.get(caixa) === estado) trocas.delete(caixa); };
+    };
   }
 
   function iniciar() {

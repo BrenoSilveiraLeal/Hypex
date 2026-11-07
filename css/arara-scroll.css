@@ -1,0 +1,8 @@
+/* O trecho fixo pertence à rolagem do documento, em ambos os sentidos. */
+.secao-arara { overflow: clip; }
+.arara-percurso { position: relative; width: 100%; }
+.arara-fixo { position: sticky; top: var(--arara-topo, 76px); width: 100%; }
+.arara-fixo .arara { width: 100%; }
+@media (prefers-reduced-motion: reduce) {
+  .arara-fixo { position: relative; top: auto; }
+}

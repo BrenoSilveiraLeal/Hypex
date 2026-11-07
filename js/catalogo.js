@@ -268,7 +268,10 @@
   ];
 
   /* Fotos em img/ (grande) e img/p/ (leve). Para trocar por fotos reais, mantenha os nomes. */
+  /* Preencher com as imagens traseiras após sua geração e conferência. */
+  const FOTOS_COSTAS = {};
   PRODUTOS.forEach(p => { p.foto = `img/${p.id}.png`; p.fotoLeve = `img/p/${p.id}.png`; });
+  PRODUTOS.forEach(p => { p.fotoCostas = FOTOS_COSTAS[p.id]; });
   /* Cada modelo só aparece na loja quando tem foto própria (img/<id>-m<n>.png).
      Para liberar outro modelo, gere a foto e acrescente o id e o número aqui. */
   const MODELOS_COM_FOTO = {
@@ -281,17 +284,17 @@
       if (i === 0) return true;
       if (!lib.includes(i)) return false;
       m.foto = `img/${p.id}-m${i}.png`; m.fotoLeve = `img/p/${p.id}-m${i}.png`;
+      m.fotoCostas = FOTOS_COSTAS[`${p.id}-m${i}`];
       return true;
     });
   });
 
-  /* A ordem e as fotos devem corresponder à fotografia da parede de tênis. */
+  /* A parede usa sua própria fotografia; o catálogo mantém os PNGs recortados. */
   const TENIS_NA_PAREDE = ['cometa', 'quadra', 'bolha', 'atelie', 'trilha', 'retro', 'pilar', 'lua', 'couro', 'onda'];
   const CORES_NA_PAREDE = { cometa: 'tangerina', quadra: 'mata', retro: 'vinho' };
   TENIS_NA_PAREDE.forEach((id, i) => {
     const p = PRODUTOS.find(p => p.id === id);
     p.indiceParede = i;
-    p.foto = p.fotoLeve = `img/tenis-${id}.webp`;
     p.fotoZoom = `img/tenis-${id}-zoom.webp`;
     p.modelos = [{ n: 'Modelo da vitrine', o: {} }];
     const cor = CORES_NA_PAREDE[id];

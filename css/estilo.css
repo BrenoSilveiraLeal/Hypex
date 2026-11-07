@@ -123,7 +123,8 @@ fieldset { border: 0; min-width: 0; }
 /* letreiro de cupons */
 .letreiro { background: var(--tinta-base); color: #fff; overflow: hidden; padding: 12px 0; }
 .letreiro-faixa { display: flex; width: max-content; animation: corre 44s linear infinite; }
-.letreiro:hover .letreiro-faixa, .letreiro:focus-within .letreiro-faixa { animation-play-state: paused; }
+.letreiro:has(.cupom-chip:focus-visible) .letreiro-faixa { animation-play-state: paused; }
+@media (hover: hover) { .letreiro:hover .letreiro-faixa { animation-play-state: paused; } }
 .letreiro-grupo { display: flex; gap: 12px; padding-right: 12px; }
 @keyframes corre { to { transform: translateX(-50%); } }
 .cupom-chip { display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; padding: 6px 14px; min-height: 36px; border-radius: 8px; font-size: 14px; color: #fff; transition: background .15s; }
@@ -135,8 +136,8 @@ fieldset { border: 0; min-width: 0; }
 .mosaico-grade { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 12px; grid-auto-rows: clamp(170px, 19vw, 280px); grid-auto-flow: dense; }
 .ladrilho { position: relative; display: block; overflow: hidden; background: var(--fundo); color: var(--tinta); padding: 18px; text-decoration: none; grid-column: span 3; border-radius: 6px; isolation: isolate; }
 .ladrilho-tenis { grid-column: span 6; grid-row: span 2; }
-.ladrilho-casacos, .ladrilho-acessorios { grid-column: span 6; }
-.ladrilho-casacos .ladrilho-peca, .ladrilho-acessorios .ladrilho-peca { inset: 10px 14px 10px 38%; }
+.ladrilho-casacos { grid-column: span 3; }
+.ladrilho-casacos .ladrilho-peca { inset: 58px 8px 8px; }
 .ladrilho-nome { display: block; font-family: var(--display); font-weight: 900; font-size: clamp(19px, 2.2vw, 32px); line-height: 1.04; letter-spacing: -.03em; position: relative; z-index: 2; }
 .ladrilho-tenis .ladrilho-nome { font-size: clamp(36px, 6vw, 88px); }
 .ladrilho .mono { position: relative; z-index: 2; display: block; margin-top: 6px; }

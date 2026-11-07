@@ -59,7 +59,14 @@
     }
     return id;
   }
-  function fotoHTML(p, cor, grande, modelo = 0) {
+  function fotoHTML(p, cor, grande, modelo = 0, vista = 'frente') {
+    if (vista === 'costas') {
+      const md = p.modelos[modelo] || {};
+      const costas = md.fotoCostas || (modelo === 0 ? p.fotoCostas : null);
+      if (!costas) return `<span class="arte costas-pendente" role="status"><span>Vista das costas</span><strong>Imagem em preparação</strong><small>A foto traseira desta peça ainda não está disponível.</small></span>`;
+      const filtro = cor !== p.cores[0] ? ` style="filter:url(#${filtroCor(cor, p.cores[0])})"` : '';
+      return `<span class="arte foto foto-topo"><img src="${costas}" alt="${seguro(p.nome)}, vista das costas" draggable="false"${filtro}></span>`;
+    }
     const md = p.modelos[modelo] || {}, foto = md.foto || p.foto, leve = md.fotoLeve || p.fotoLeve;
     const topo = ehArara(p) ? ' foto-topo' : '';
     const filtro = cor !== p.cores[0] ? ` style="filter:url(#${filtroCor(cor, p.cores[0])})"` : '';
@@ -184,7 +191,7 @@
         ${p.de ? `<span class="selo">-${Math.round((1 - p.preco / p.de) * 100)}%</span>` : ''}
       </a>
       <div class="card-info">
-        <a class="card-nome" href="#p-${p.id}">${p.nome}</a>
+        <a class="card-nome" href="#p-${p.id}" data-peca="${p.id}">${p.nome}</a>
         <p class="card-preco">${preco(p)}</p>
         <div class="bolinhas" role="group" aria-label="Cores de ${p.nome}">${p.cores.slice(0, 5).map(k => `<button type="button" class="bolinha${k === s.cor ? ' ativa' : ''}" style="--c:${CORES[k].a}" data-card-cor="${k}" aria-label="${CORES[k].nome}" aria-pressed="${k === s.cor}"></button>`).join('')}</div>
       </div>
@@ -412,14 +419,15 @@
           <button type="button" data-modo="grade" data-dep="${k}" aria-pressed="${modo === 'grade'}">Grade</button>
         </div>`;
     const outros = `<div class="dep-outros">${Object.entries(DEPARTAMENTOS).filter(([x]) => x !== k).map(([x, o]) => `<a class="pilula" href="#${x}">${o.nome}</a>`).join('')}</div>`;
+    const filtrosHTML = `<div class="guia fb-linha dep-filtros">${barraFiltros(k, doDep(k))}${modoHTML}</div>`;
     if (d.exp === 'arara' && modo === 'vitrine') {
       return `<section class="dep dep-arara secao-arara" data-tom="claro">
         <p class="arara-selo mono">${d.nome} &nbsp;|&nbsp; ${lista.length} ${lista.length === 1 ? 'peça' : 'peças'}</p>
-        <div class="guia fb-linha">${barraFiltros(k, doDep(k))}</div>
+        ${filtrosHTML}
         ${vitrine}
         <div class="arara-texto guia">
           <h1 class="arara-grande">${d.nome}</h1>
-          <div><p>${d.frase}</p><p class="arara-dica">Clique em uma peça para ver fotos, cores e tamanhos.</p><div class="arara-botoes">${modoHTML}</div></div>
+          <div><p>${d.frase}</p><p class="arara-dica">Clique em uma peça para ver fotos, cores e tamanhos.</p></div>
         </div>
         <div class="guia">${outros}</div>
       </section>`;
@@ -430,9 +438,8 @@
           <p class="mono">${d.nome} / ${String(lista.length).padStart(2, '0')} peças</p>
           <h1 class="titulo-dep">${d.frase}</h1>
         </div>
-        ${modoHTML}
       </div>
-      <div class="guia fb-linha">${barraFiltros(k, doDep(k))}</div>
+      ${filtrosHTML}
       <div class="guia">${lista.length ? `<div class="grade">${lista.map(cardHTML).join('')}</div>` : semResultado(k)}</div>
       <div class="guia">${outros}</div>
     </section>`;
@@ -570,6 +577,91 @@
       ${f.publico || f.tam || f.cor ? `<button type="button" class="fb-limpar" data-fb-limpar data-ns="${ns}">${icone('fechar')}Limpar</button>` : ''}
     </div>`;
   }
+  let araraFiltroTimer = 0, araraFiltroAnim = null, araraFiltrando = false, araraFiltroEstado = null;
+  function cancelarFiltroArara() {
+    clearTimeout(araraFiltroTimer);
+    if (araraFiltroAnim) { araraFiltroAnim.cancel(); araraFiltroAnim = null; }
+    if (!araraFiltrando) araraFiltroEstado = null;
+  }
+  function transicaoCorArara(ns, foco) {
+    const trilho = $('.arara-trilho'), rota = location.hash;
+    $$(`[data-fb="cor"][data-ns="${ns}"]`).forEach(b => {
+      const ativa = b.dataset.v === estadoFiltro(ns).cor;
+      b.classList.toggle('ativa', ativa);
+      b.setAttribute('aria-pressed', ativa);
+    });
+    /* Durante a saída, a próxima coleção usa a escolha mais recente.
+       Durante a entrada, termina o movimento e mantém só a última escolha. */
+    if (araraFiltroEstado && araraFiltroEstado.ns === ns && araraFiltroEstado.rota === rota) {
+      araraFiltroEstado.foco = foco;
+      return;
+    }
+    trilho.closest('.arara').classList.remove('ver');
+    const inicios = new Map($$('.cabide', trilho).map(peca => {
+      const s = getComputedStyle(peca);
+      return [peca, { translate: s.translate === 'none' ? '0px' : s.translate, opacity: s.opacity }];
+    }));
+    cancelarFiltroArara();
+    const estado = { ns, rota, foco, aplicado: null };
+    araraFiltroEstado = estado;
+    const animarFila = (trilho, entrando, estados = new Map()) => {
+      const pecas = $$('.cabide', trilho), esquerda = trilho.getBoundingClientRect().left;
+      const visiveis = pecas.filter(p => esquerda + p.offsetLeft < innerWidth + 40 && esquerda + p.offsetLeft + p.offsetWidth > -40);
+      const duracao = entrando ? 850 : 650, intervalo = 150, animacoes = [];
+      pecas.forEach(peca => {
+        const i = visiveis.indexOf(peca);
+        if (i < 0) {
+          animacoes.push(peca.animate([{ opacity: 0 }, { opacity: 0 }], { duration: 1, fill: 'forwards' }));
+          return;
+        }
+        const de = entrando ? { translate: '100vw', opacity: 0 } : estados.get(peca) || { translate: '0px', opacity: 1 };
+        const ate = entrando ? { translate: '0px', opacity: 1 } : { translate: '-100vw', opacity: 0 };
+        animacoes.push(peca.animate([de, ate], {
+          duration: duracao, delay: i * intervalo,
+          easing: entrando ? 'cubic-bezier(.16,1,.3,1)' : 'cubic-bezier(.4,0,.7,1)',
+          fill: entrando ? 'backwards' : 'forwards'
+        }));
+      });
+      return {
+        duracao: duracao + Math.max(0, visiveis.length - 1) * intervalo,
+        cancel: () => animacoes.forEach(a => a.cancel()),
+        finished: Promise.all(animacoes.map(a => a.finished)).catch(() => null)
+      };
+    };
+    trilho.closest('.arara').setAttribute('aria-busy', 'true');
+    araraFiltroAnim = animarFila(trilho, false, inicios);
+    const tempoSaida = araraFiltroAnim.duracao;
+    araraFiltroTimer = setTimeout(() => {
+      if (location.hash !== rota || !trilho.isConnected || araraFiltroEstado !== estado) return;
+      const y = scrollY;
+      estado.aplicado = JSON.stringify(estadoFiltro(ns));
+      araraFiltrando = true;
+      try { desenharRota(false); } finally { araraFiltrando = false; }
+      scrollTo(0, y);
+      const novo = $('.arara-trilho');
+      if (novo) {
+        /* Cada cabide chega no seu tempo, sem mover a faixa inteira. */
+        novo.closest('.arara').classList.remove('ver');
+        novo.closest('.arara').setAttribute('aria-busy', 'true');
+        const entrada = animarFila(novo, true);
+        araraFiltroAnim = entrada;
+        entrada.finished.then(() => {
+          if (araraFiltroAnim !== entrada || araraFiltroEstado !== estado || !novo.isConnected) return;
+          entrada.cancel(); araraFiltroAnim = null;
+          novo.closest('.arara').removeAttribute('aria-busy');
+          araraFiltroEstado = null;
+          if (JSON.stringify(estadoFiltro(ns)) !== estado.aplicado) transicaoCorArara(ns, estado.foco);
+        });
+        limpezas.push(cancelarFiltroArara);
+      } else {
+        araraFiltroEstado = null;
+        const vazio = $('.fb-vazio');
+        if (vazio) vazio.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 250 });
+      }
+      if (estado.foco) { const b = $(`[data-foco="${estado.foco}"]`); if (b) b.focus({ preventScroll: true }); }
+    }, tempoSaida);
+    limpezas.push(cancelarFiltroArara);
+  }
   function aplicarFiltro(ns, foco, corAntes) {
     const f = estadoFiltro(ns), base = ns === 'loja' ? VISIVEIS : doDep(ns);
     /* quem filtra por cor já vê cada peça naquela cor */
@@ -579,10 +671,12 @@
       else if (CORES[s.cor].familia !== f.cor) { const k = p.cores.find(x => CORES[x].familia === f.cor); if (k) s.cor = k; }
     });
     if (ns === 'loja') { repintarLoja(foco); return; }
+    if (f.cor !== corAntes && $('.arara-trilho') && !calmo()) { transicaoCorArara(ns, foco); return; }
+    cancelarFiltroArara();
     const y = scrollY;
     desenharRota(false);
     scrollTo(0, y);
-    if (foco) { const a = $(`[data-foco="${foco}"]`); if (a) a.focus(); }
+    if (foco) { const a = $(`[data-foco="${foco}"]`); if (a) a.focus({ preventScroll: true }); }
   }
   function telaLoja() {
     const f = S.filtros, l = filtrados();
@@ -605,7 +699,7 @@
       <div class="loja-barra">
         ${barraFiltros('loja', base, extra)}
       </div>
-      ${!l.length ? semResultado('loja')
+      <div class="loja-resultados">${!l.length ? semResultado('loja')
         : f.dep || f.q ? `<div class="grade">${l.map(cardHTML).join('')}</div>`
         : Object.entries(DEPARTAMENTOS).map(([k, d]) => {
           const grupo = l.filter(p => p.dep === k);
@@ -617,7 +711,7 @@
             </header>
             <div class="grade">${grupo.slice(0, 4).map(cardHTML).join('')}</div>
           </section>`;
-        }).join('')}
+        }).join('')}</div>
     </section>`;
   }
 
@@ -671,10 +765,11 @@
     const s = selDe(p), c = CORES[s.cor], sec = $('#pdp');
     if (!sec) return;
     const box = $('#pdp-peca');
-    box.innerHTML = p.foto ? fotoHTML(p, s.cor, true, s.modelo) : arte(p, s.cor, s.modelo, s.vista);
-    $('#nome-cor').textContent = c.nome;
-    pintarCorParede(p);
-    if (comAnim) Mov.trocaPeca(box.firstElementChild);
+    Mov.trocaPeca(box, () => {
+      box.innerHTML = p.foto ? fotoHTML(p, s.cor, true, s.modelo) : arte(p, s.cor, s.modelo, s.vista);
+      $('#nome-cor').textContent = c.nome;
+      pintarCorParede(p);
+    }, comAnim && ehArara(p));
   }
 
   /* ---------- SACOLA ---------- */
@@ -1101,8 +1196,9 @@
     const pontos = $$('.arara-pontos i', el); let pontoAtual = -1;
     const ang = itens.map(() => ({ a: 0, v: 0, f: 0, b: 0 }));
     let x = 0, v = 0, vAnt = 0, dest = null, arrastando = false, px = 0, inicio = 0, moveu = false, raf = 0, ultT = 0, morto = false, tAnt = 0;
-    const min = () => Math.min(0, el.clientWidth - trilho.scrollWidth);
+    const min = () => Math.min(0, el.clientWidth - trilho.offsetWidth);
     const parado = calmo();
+    let percursoScroll = null;
 
     function desenho() {
       trilho.style.transform = `translate3d(${x.toFixed(2)}px,0,0)`;
@@ -1117,7 +1213,7 @@
       if (morto) return;
       const f = Math.min(2.5, tAnt ? (agora - tAnt) / 16.67 : 1) || 1; tAnt = agora;
       const m = min();
-      if (!arrastando) {
+      if (!arrastando && !percursoScroll) {
         if (dest !== null) {
           const d = dest - x;
           v += (d * .0125 - v * .224) * f;
@@ -1127,6 +1223,7 @@
         if (x > 0) { x += (0 - x) * .12 * f; v *= Math.pow(.7, f); }
         if (x < m) { x += (m - x) * .12 * f; v *= Math.pow(.7, f); }
       }
+      if (!arrastando && percursoScroll) v *= Math.pow(.82, f);
       const acel = (v - vAnt) / f; vAnt = v;
       let ativo = arrastando || dest !== null || Math.abs(v) > .05 || x > .5 || x < m - .5;
       if (!parado) ang.forEach((g, i) => {
@@ -1143,49 +1240,62 @@
       raf = ativo ? requestAnimationFrame(tick) : 0;
     }
     const acorda = () => { if (!raf) raf = requestAnimationFrame(tick); };
-    /* O scroll percorre as peças; nas extremidades, volta a rolar a página. */
-    const areaScroll = el.closest('.secao-arara') || el;
-    const rolarArara = e => {
-      if (morto || arrastando || e.ctrlKey || !e.cancelable || min() >= -1) return;
-      if (e.target.closest('input, select, textarea, [contenteditable="true"]')) return;
-      const unidade = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? innerHeight : 1;
-      const delta = (Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY) * unidade;
-      if (!delta) return;
-      const m = min(), base = Math.max(m, Math.min(0, dest === null ? x : dest));
-      const limite = delta > 0 ? m : 0;
-      if (Math.abs(base - limite) < .75 && Math.abs(x - limite) < .75) {
-        x = limite; dest = null; v = 0; desenho();
-        return;
-      }
-      const r = el.getBoundingClientRect();
-      const topo = Math.max(0, $('.topo').getBoundingClientRect().bottom) + 12;
-      const fundo = innerHeight - 20;
-      if (r.height > fundo - topo + 1) return;
-      /* Primeiro enquadra a roupa inteira; só o próximo scroll move as peças. */
-      if (delta > 0 && r.bottom > fundo + 1 && r.top >= topo - 1) {
-        e.preventDefault();
-        scrollBy({ top: Math.min(delta, r.bottom - fundo), behavior: 'instant' });
-        return;
-      }
-      if (delta < 0 && r.top < topo - 1 && r.bottom <= fundo + 1) {
-        e.preventDefault();
-        scrollBy({ top: Math.max(delta, r.top - topo), behavior: 'instant' });
-        return;
-      }
-      if (r.top < topo - 1 || r.bottom > fundo + 1) return;
-      e.preventDefault();
-      dest = Math.max(m, Math.min(0, base - delta));
-      if (parado) { x = dest; dest = null; v = 0; desenho(); }
-      else acorda();
+    const irPara = (valor, suave = true) => {
+      const alvo = Math.max(min(), Math.min(0, valor));
+      if (percursoScroll) percursoScroll.ir(alvo, suave);
+      else { dest = alvo; acorda(); }
     };
-    areaScroll.addEventListener('wheel', rolarArara, { passive: false });
-    limpezas.push(() => areaScroll.removeEventListener('wheel', rolarArara));
+    /* A rolagem nativa percorre uma faixa vertical com a arara fixa.
+       O progresso tem a mesma origem nos dois sentidos, sem capturar wheel. */
+    if (!parado && min() < -1) {
+      const percurso = document.createElement('div'), fixo = document.createElement('div');
+      percurso.className = 'arara-percurso'; fixo.className = 'arara-fixo';
+      el.before(percurso); percurso.append(fixo); fixo.append(el);
+      let distancia = 0, inicioScroll = 0, topo = 0;
+      const sincronizar = () => {
+        if (morto) return;
+        inicioScroll = percurso.getBoundingClientRect().top + scrollY - topo;
+        const novo = -Math.max(0, Math.min(distancia, scrollY - inicioScroll));
+        if (Math.abs(novo - x) < .01) return;
+        v = Math.max(-60, Math.min(60, novo - x)); x = novo; dest = null;
+        desenho(); acorda();
+      };
+      const medir = (preservar = false) => {
+        const dentro = distancia > 0 && scrollY >= inicioScroll && scrollY <= inicioScroll + distancia;
+        const progresso = distancia ? Math.max(0, Math.min(1, -x / distancia)) : 0;
+        topo = $('.topo').offsetHeight + 12;
+        distancia = Math.max(0, -min());
+        percurso.style.height = (el.offsetHeight + distancia) + 'px';
+        percurso.style.setProperty('--arara-topo', topo + 'px');
+        inicioScroll = percurso.getBoundingClientRect().top + scrollY - topo;
+        if (preservar && dentro && Math.abs(scrollY - inicioScroll - progresso * distancia) > 1) scrollTo({ top: inicioScroll + progresso * distancia, behavior: 'instant' });
+        sincronizar();
+      };
+      percursoScroll = {
+        ir(valor, suave) {
+          inicioScroll = percurso.getBoundingClientRect().top + scrollY - topo;
+          scrollTo({ top: inicioScroll - valor, behavior: suave ? 'smooth' : 'instant' });
+          if (!suave) sincronizar();
+        }
+      };
+      const redimensionar = () => medir(true);
+      addEventListener('scroll', sincronizar, { passive: true });
+      addEventListener('resize', redimensionar);
+      const observer = new ResizeObserver(redimensionar); observer.observe(el);
+      medir();
+      limpezas.push(() => {
+        removeEventListener('scroll', sincronizar); removeEventListener('resize', redimensionar);
+        observer.disconnect(); percursoScroll = null;
+        if (percurso.isConnected) { percurso.before(el); percurso.remove(); }
+      });
+    }
     const mover = e => {
       if (!arrastando) return;
       const dx = e.clientX - px; px = e.clientX;
       if (Math.abs(e.clientX - inicio) > 6) moveu = true;
       const m = min();
       x += (x > 0 || x < m) ? dx * .35 : dx;
+      if (percursoScroll) irPara(x, false);
       const agora = performance.now(), dt = Math.max(8, agora - ultT); ultT = agora;
       v = dx * 16 / dt;
       acorda();
@@ -1211,7 +1321,7 @@
       it.addEventListener('pointerenter', e => { if (e.pointerType !== 'touch' && !arrastando && !parado) { ang[i].v += .28; acorda(); } });
       it.addEventListener('focus', () => {
         const r = it.offsetLeft, w = it.offsetWidth;
-        if (r + x < 0 || r + w + x > el.clientWidth) { dest = Math.max(min(), Math.min(0, el.clientWidth / 2 - r - w / 2)); trilho.parentElement.scrollLeft = 0; acorda(); }
+        if (r + x < 0 || r + w + x > el.clientWidth) { irPara(el.clientWidth / 2 - r - w / 2); trilho.parentElement.scrollLeft = 0; }
       });
     });
     $$('[data-seta]', el).forEach(b => b.addEventListener('click', () => {
@@ -1219,8 +1329,7 @@
       const passo = itens.length > 1 ? itens[1].offsetLeft - itens[0].offsetLeft : el.clientWidth * .7;
       const qtd = Math.max(1, Math.floor(el.clientWidth * .62 / passo));
       const base = Math.round((dest === null ? x : dest) / passo) * passo;
-      dest = Math.max(min(), Math.min(0, base - b.dataset.seta * qtd * passo));
-      acorda();
+      irPara(base - b.dataset.seta * qtd * passo);
     }));
     const cabe = () => el.classList.toggle('cabe', min() === 0);
     const rs = () => { cabe(); acorda(); };
@@ -1228,7 +1337,7 @@
     cabe();
     desenho();
     /* entrada: as peças chegam deslizando e balançam ao parar */
-    if (!parado && 'IntersectionObserver' in window) {
+    if (!parado && !araraFiltrando && 'IntersectionObserver' in window) {
       const io = new IntersectionObserver(es => es.forEach(en => {
         if (!en.isIntersecting) return;
         io.disconnect(); el.classList.add('ver');
@@ -1424,6 +1533,41 @@
 
   /* ---------- ROTAS ---------- */
   let rotaAtual = '', origem = null;
+  let zoomPeca = null;
+  function limparZoomPeca() {
+    if (!zoomPeca) return;
+    const z = zoomPeca; zoomPeca = null;
+    z.animacao.cancel(); z.bloqueio.remove();
+  }
+  function abrirRoupaComZoom(link) {
+    if (zoomPeca) return;
+    const original = $('.arte', link) || $('.arte', link.closest('.card') || link), p = porId(link.dataset.peca);
+    if (!original || !p) return;
+    const r = original.getBoundingClientRect(), cena = app.getBoundingClientRect(), rota = location.hash;
+    if (!r.width || !r.height) { location.hash = link.hash; return; }
+    const bloqueio = document.createElement('div'); bloqueio.className = 'peca-camera-bloqueio';
+    bloqueio.addEventListener('wheel', e => e.preventDefault(), { passive: false });
+    document.body.append(bloqueio);
+    const s = selDe(p), preload = new Image();
+    preload.src = (p.modelos[s.modelo] || {}).foto || p.foto;
+    const escala = Math.max(1.35, Math.min(1.8, innerHeight * .96 / r.height, innerWidth * .90 / r.width));
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const dx = innerWidth / 2 - cx, dy = innerHeight / 2 - cy;
+    /* A cena inteira aproxima: cabide, vizinhos e ambiente acompanham a c?mera. */
+    const origemCamera = `${cx - cena.left}px ${cy - cena.top}px`;
+    const animacao = app.animate([
+      { transform: 'translate(0,0) scale(1)', transformOrigin: origemCamera },
+      { transform: `translate(${dx}px,${dy}px) scale(${escala})`, transformOrigin: origemCamera }
+    ], { duration: 650, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' });
+    zoomPeca = { original, bloqueio, animacao, navegando: false };
+    animacao.onfinish = () => {
+      if (!zoomPeca || location.hash !== rota) { limparZoomPeca(); return; }
+      const foto = original.getBoundingClientRect();
+      origem = { left: foto.left, top: foto.top, width: foto.width, camera: true };
+      zoomPeca.navegando = true;
+      location.hash = link.hash;
+    };
+  }
   const scrolls = {};
   function marcarNav(h) {
     const p = h.startsWith('p-') ? porId(h.slice(2)) : null;
@@ -1458,7 +1602,20 @@
     if (calmo()) return;
     app.classList.add('entrar');
     setTimeout(() => app.classList.remove('entrar'), 1500);
-    /* a peça clicada viaja até o lugar dela na nova página */
+    if (flip && flip.camera) {
+      const peca = $('#pdp-peca .arte');
+      if (peca) {
+        const r = peca.getBoundingClientRect(), cena = app.getBoundingClientRect(), escala = flip.width / r.width;
+        const dx = flip.left - cena.left - (r.left - cena.left) * escala;
+        const dy = flip.top - cena.top - (r.top - cena.top) * escala;
+        app.animate([
+          { transformOrigin: '0 0', transform: `translate(${dx}px,${dy}px) scale(${escala})`, opacity: .75 },
+          { transformOrigin: '0 0', transform: 'none', opacity: 1 }
+        ], { duration: 600, easing: 'cubic-bezier(.16,1,.3,1)' });
+      }
+      return;
+    }
+    /* As demais origens preservam sua transicao de entrada. */
     const alvo = flip && $('#pdp-peca .arte');
     if (alvo) {
       const r = alvo.getBoundingClientRect();
@@ -1487,6 +1644,7 @@
     }
   }
   function trocarRota() {
+    if (zoomPeca && !zoomPeca.navegando) limparZoomPeca();
     scrolls[rotaAtual] = scrollY;
     const destino = location.hash.slice(1) || 'inicio';
     const p = destino.startsWith('p-') ? porId(destino.slice(2)) : null;
@@ -1505,6 +1663,7 @@
     }
     const flip = depCena ? null : origem; origem = null;
     const troca = () => {
+      if (flip && flip.camera) limparZoomPeca();
       rotaAtual = desenharRota(true);
       scrollTo(0, scrolls[destino] && !destino.startsWith('p-') && destino !== 'checkout' ? scrolls[destino] : 0);
       aoRolar();
@@ -1554,10 +1713,18 @@
   document.addEventListener('click', e => {
     const t = e.target, c = s => t.closest(s);
     let el;
+    if ((el = c('.cabide[data-peca], .card-peca[data-peca], .card-nome[data-peca]')) && ehArara(porId(el.dataset.peca)) && !calmo() && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey && !e.button) {
+      e.preventDefault(); abrirRoupaComZoom(el); return;
+    }
     if ((el = c('[data-peca]'))) { origem = null; const a = $('.arte', el); if (a && !el.closest('#cena')) { const r = a.getBoundingClientRect(); origem = { left: r.left, top: r.top, width: r.width }; const viz = el.closest('.vizinho'), centro = $('#pdp-peca .arte'); if (viz && centro) { const rc = centro.getBoundingClientRect(); origem.lado = viz.classList.contains('vizinho-d') ? 'd' : 'e'; origem.centro = { left: rc.left, top: rc.top, width: rc.width }; } } }
     if ((el = c('[data-ver-dep]'))) { Object.assign(S.filtros, { dep: el.dataset.verDep, estilo: '', publico: '', cor: '', promo: false, q: '' }); }
     if ((el = c('[data-tela]'))) { irTela(+el.dataset.tela); return; }
-    if ((el = c('[data-fb]'))) { const f = estadoFiltro(el.dataset.ns), g = el.dataset.fb, antes = f.cor; f[g] = f[g] === el.dataset.v ? '' : el.dataset.v; aplicarFiltro(el.dataset.ns, el.dataset.foco, antes); return; }
+    if ((el = c('[data-fb]'))) {
+      const f = estadoFiltro(el.dataset.ns), g = el.dataset.fb, antes = f.cor;
+      if (g === 'cor' && f.cor === el.dataset.v) return;
+      f[g] = f[g] === el.dataset.v ? '' : el.dataset.v;
+      aplicarFiltro(el.dataset.ns, el.dataset.foco, antes); return;
+    }
     if ((el = c('[data-fb-limpar]'))) { const f = estadoFiltro(el.dataset.ns), antes = f.cor; f.publico = f.tam = f.cor = ''; if (el.dataset.ns === 'loja') { f.estilo = ''; f.promo = false; f.q = ''; } aplicarFiltro(el.dataset.ns, null, antes); return; }
     if ((el = c('[data-look]'))) { $('#looks').outerHTML = looksHTML(lookI + (+el.dataset.look), true); revelar(); return; }
     if ((el = c('[data-slide]'))) { trocarHero(+el.dataset.slide); const b = $(`[data-slide="${el.dataset.slide}"]`); if (b) b.focus(); iniciarTimerHero(); return; }
@@ -1576,9 +1743,8 @@
       const card = el.closest('[data-card]'), p = porId(card.dataset.card), s = selDe(p);
       s.cor = el.dataset.cardCor;
       card.style.setProperty('--fundo', CORES[s.cor].fundo); card.style.setProperty('--tinta', CORES[s.cor].tinta);
-      const box = $('.card-peca', card), velha = $('.arte', box);
-      velha.outerHTML = arte(p, s.cor, s.modelo);
-      Mov.trocaPeca($('.arte', box));
+      const box = $('.card-peca', card);
+      Mov.trocaPeca(box, () => { $('.arte', box).outerHTML = arte(p, s.cor, s.modelo); });
       $$('.bolinha', card).forEach(b => { const on = b.dataset.cardCor === s.cor; b.classList.toggle('ativa', on); b.setAttribute('aria-pressed', on); });
       return;
     }
@@ -1590,21 +1756,12 @@
       if ((el = c('[data-cor]'))) { s.cor = el.dataset.cor; $$('[data-cor]', pdp).forEach(b => { const on = b.dataset.cor === s.cor; b.classList.toggle('ativa', on); b.setAttribute('aria-pressed', on); }); pintarProduto(p, true); return; }
       if ((el = c('[data-modelo]'))) { s.modelo = +el.dataset.modelo; $$('[data-modelo]', pdp).forEach(b => { const on = +b.dataset.modelo === s.modelo; b.classList.toggle('ativa', on); b.setAttribute('aria-pressed', on); }); pintarProduto(p, true); return; }
       if ((el = c('[data-tam]'))) { s.tam = el.dataset.tam; $$('[data-tam]', pdp).forEach(b => { const on = b.dataset.tam === s.tam; b.classList.toggle('ativa', on); b.setAttribute('aria-pressed', on); }); $('#erro-tam').hidden = true; const mn = $('#tam-menu'); if (mn) { Mov.fechar(mn); $('#tam-txt').textContent = 'Tamanho ' + s.tam; } return; }
-      if (c('[data-girar]')) {
-        const box = $('#pdp-peca');
-        const troca = () => { s.vista = s.vista === 'costas' ? 'frente' : 'costas'; box.innerHTML = arte(p, s.cor, s.modelo, s.vista); };
-        if (calmo()) troca();
-        else {
-          const a1 = box.animate([{ transform: 'rotateY(0)' }, { transform: 'rotateY(90deg)' }], { duration: 240, easing: 'ease-in', fill: 'forwards' });
-          setTimeout(() => { troca(); a1.cancel(); box.animate([{ transform: 'rotateY(-90deg)' }, { transform: 'rotateY(0)' }], { duration: 300, easing: 'cubic-bezier(.2,.9,.3,1)' }); }, 240);
-        }
-        return;
-      }
+
     }
 
     /* filtros */
     if (c('[data-abre-filtros]')) { S.filtroAberto = !S.filtroAberto; const pn = $('#painel-filtros'); pn.classList.toggle('aberto', S.filtroAberto); c('[data-abre-filtros]').setAttribute('aria-expanded', S.filtroAberto); return; }
-    if ((el = c('[data-filtro]'))) { const g = el.dataset.filtro, v = el.dataset.valor; S.filtros[g] = (g === 'cor' && S.filtros.cor === v) ? '' : v; repintarLoja(el.dataset.foco); return; }
+    if ((el = c('[data-filtro]'))) { const g = el.dataset.filtro, v = el.dataset.valor; if (g === 'cor' && S.filtros.cor === v) return; S.filtros[g] = v; repintarLoja(el.dataset.foco); return; }
     if (c('[data-promo]')) { S.filtros.promo = !S.filtros.promo; repintarLoja('promo'); return; }
     if (c('[data-limpar]')) { Object.assign(S.filtros, { dep: '', estilo: '', publico: '', tam: '', cor: '', promo: false, q: '', ordem: 'relevancia' }); repintarLoja(); return; }
     if ((el = c('[data-modo]'))) { S.modoDep[el.dataset.dep] = el.dataset.modo; desenharRota(false); entrada(); scrollTo(0, 0); return; }
@@ -1658,14 +1815,41 @@
     fecharBusca();
     if ((location.hash.slice(1) || 'inicio') === 'loja') repintarLoja(); else location.hash = 'loja';
   }
+  let lojaTransicaoTimer = 0, lojaTransicao = null;
   function repintarLoja(foco) {
-    const y = scrollY;
-    if (location.hash.slice(1).startsWith('estilo-')) { history.replaceState(null, '', '#loja'); }
-    const antes = Mov.fotografarGrade();
-    app.innerHTML = telaLoja();
-    scrollTo(0, y);
-    Mov.animarGrade(antes);
-    if (foco) { const a = $(`[data-foco="${foco}"]`); if (a) a.focus(); }
+    const rotaFiltro = location.hash;
+    const loja = $('.loja'), resultados = $('.loja-resultados', loja || app);
+    const opacidade = resultados ? getComputedStyle(resultados).opacity : '1';
+    clearTimeout(lojaTransicaoTimer);
+    if (lojaTransicao) { lojaTransicao.cancel(); lojaTransicao = null; }
+    $$('[data-fb="publico"][data-ns="loja"]').forEach(b => {
+      const ativo = b.dataset.v === S.filtros.publico;
+      b.classList.toggle('ativa', ativo);
+      b.setAttribute('aria-pressed', ativo);
+    });
+    const atualizar = () => {
+      if ((loja && !loja.isConnected) || location.hash !== rotaFiltro) return;
+      const y = scrollY, antes = Mov.fotografarGrade();
+      if (location.hash.slice(1).startsWith('estilo-')) history.replaceState(null, '', '#loja');
+      app.innerHTML = telaLoja();
+      if (lojaTransicao) { lojaTransicao.cancel(); lojaTransicao = null; }
+      scrollTo(0, y);
+      Mov.animarGrade(antes);
+      if (!calmo()) {
+        lojaTransicao = $('.loja-resultados').animate([
+          { opacity: 0, transform: 'translateY(12px)' },
+          { opacity: 1, transform: 'translateY(0)' }
+        ], { duration: 360, easing: 'cubic-bezier(.16,1,.3,1)' });
+      }
+      if (foco) { const a = $(`[data-foco="${foco}"]`); if (a) a.focus({ preventScroll: true }); }
+    };
+    if (calmo() || !resultados) { atualizar(); return; }
+    resultados.setAttribute('aria-busy', 'true');
+    lojaTransicao = resultados.animate([
+      { opacity: opacidade, transform: 'translateY(0)' },
+      { opacity: 0, transform: 'translateY(-6px)' }
+    ], { duration: 140, easing: 'ease-in', fill: 'forwards' });
+    lojaTransicaoTimer = setTimeout(atualizar, 140);
   }
   function tentarCupom(cod) {
     const k = (cod || '').trim().toUpperCase();

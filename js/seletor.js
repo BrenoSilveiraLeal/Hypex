@@ -83,7 +83,8 @@
     let html = '', n = 0;
     [...sel.children].forEach(filho => {
       if (filho.tagName === 'OPTGROUP') {
-        html += `<div class="sel-grupo" role="group" aria-label="${filho.label}"><p>${filho.label}</p><div class="sel-grupo-ops">${[...filho.children].map(o => item(o, n++)).join('')}</div></div>`;
+        const total = filho.children.length, colunas = total > 8 ? Math.ceil(total / 2) : total;
+        html += `<div class="sel-grupo" role="group" aria-label="${filho.label}"><p>${filho.label}</p><div class="sel-grupo-ops" style="--sel-colunas:${colunas}">${[...filho.children].map(o => item(o, n++)).join('')}</div></div>`;
       } else html += item(filho, n++);
     });
     menu.innerHTML = html;

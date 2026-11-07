@@ -469,11 +469,19 @@ details > summary::marker { content: ""; }
   .loja-cab-d { justify-content: flex-start; }
 }
 /* ---------- tamanhos: painel largo, tudo à vista sem rolagem ---------- */
-.sel-menu.sel-grupos { display: block; columns: 2; column-gap: 20px; padding: 10px; }
-.sel-grupos > .sel-op.larga { display: flex; column-span: all; justify-content: center; width: 100%; min-height: 34px; margin-bottom: 10px; }
-.sel-grupo { break-inside: avoid; margin-bottom: 10px; }
+.sel-menu.sel-grupos { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 10px; }
+.sel-grupos > .sel-op.larga { display: flex; justify-content: center; width: 100%; min-height: 34px; margin: 0; }
+.sel-grupo { min-width: 0; margin: 0; }
 .sel-grupo:last-child { margin-bottom: 0; }
 .sel-grupo + .sel-grupo { padding-top: 0; border-top: 0; }
 .sel-grupo p { margin-bottom: 4px; }
-.sel-grupo-ops .sel-op { min-height: 32px; font-size: 12.5px; }
-@media (max-width: 699px) { .sel-menu.sel-grupos { columns: 1; } }
+.sel-grupos .sel-grupo-ops { display: flex; flex-wrap: wrap; gap: 4px; }
+.sel-grupo-ops .sel-op { flex: 1 1 max(44px, calc((100% - (var(--sel-colunas, 6) - 1) * 4px) / var(--sel-colunas, 6))); min-width: 44px; min-height: 36px; font-size: 12.5px; justify-content: center; }
+
+.dep-filtros { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.dep .dep-filtros > .fb { flex: 1; justify-content: flex-start; }
+.dep-filtros > .modo { flex: none; margin-left: auto; }
+@media (max-width: 1100px) {
+  .dep-filtros { flex-wrap: wrap; gap: 12px; }
+  .dep .dep-filtros > .fb { flex-basis: 100%; }
+}
