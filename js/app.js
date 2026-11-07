@@ -1539,7 +1539,7 @@
     const z = zoomPeca; zoomPeca = null;
     z.animacao.cancel(); z.bloqueio.remove();
   }
-  function abrirRoupaComZoom(link) {
+  function abrirRoupaComZoom(link, ponto) {
     if (zoomPeca) return;
     const original = $('.arte', link) || $('.arte', link.closest('.card') || link), p = porId(link.dataset.peca);
     if (!original || !p) return;
@@ -1551,19 +1551,18 @@
     const s = selDe(p), preload = new Image();
     preload.src = (p.modelos[s.modelo] || {}).foto || p.foto;
     const escala = Math.max(1.35, Math.min(1.8, innerHeight * .96 / r.height, innerWidth * .90 / r.width));
-    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-    const dx = innerWidth / 2 - cx, dy = innerHeight / 2 - cy;
-    /* A cena inteira aproxima: cabide, vizinhos e ambiente acompanham a c?mera. */
+    const cx = Math.max(24, Math.min(innerWidth - 24, ponto ? ponto.x : r.left + r.width / 2));
+    const cy = Math.max(24, Math.min(innerHeight - 24, ponto ? ponto.y : r.top + r.height / 2));
+    /* O ponto observado permanece fixo: não transporta a peça para o centro. */
     const origemCamera = `${cx - cena.left}px ${cy - cena.top}px`;
     const animacao = app.animate([
-      { transform: 'translate(0,0) scale(1)', transformOrigin: origemCamera },
-      { transform: `translate(${dx}px,${dy}px) scale(${escala})`, transformOrigin: origemCamera }
+      { transform: 'scale(1)', transformOrigin: origemCamera },
+      { transform: `scale(${escala})`, transformOrigin: origemCamera }
     ], { duration: 650, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' });
     zoomPeca = { original, bloqueio, animacao, navegando: false };
     animacao.onfinish = () => {
       if (!zoomPeca || location.hash !== rota) { limparZoomPeca(); return; }
-      const foto = original.getBoundingClientRect();
-      origem = { left: foto.left, top: foto.top, width: foto.width, camera: true };
+      origem = { camera: true };
       zoomPeca.navegando = true;
       location.hash = link.hash;
     };
@@ -1603,16 +1602,7 @@
     app.classList.add('entrar');
     setTimeout(() => app.classList.remove('entrar'), 1500);
     if (flip && flip.camera) {
-      const peca = $('#pdp-peca .arte');
-      if (peca) {
-        const r = peca.getBoundingClientRect(), cena = app.getBoundingClientRect(), escala = flip.width / r.width;
-        const dx = flip.left - cena.left - (r.left - cena.left) * escala;
-        const dy = flip.top - cena.top - (r.top - cena.top) * escala;
-        app.animate([
-          { transformOrigin: '0 0', transform: `translate(${dx}px,${dy}px) scale(${escala})`, opacity: .75 },
-          { transformOrigin: '0 0', transform: 'none', opacity: 1 }
-        ], { duration: 600, easing: 'cubic-bezier(.16,1,.3,1)' });
-      }
+      app.animate([{ opacity: .25 }, { opacity: 1 }], { duration: 380, easing: 'ease-out' });
       return;
     }
     /* As demais origens preservam sua transicao de entrada. */
@@ -1714,7 +1704,7 @@
     const t = e.target, c = s => t.closest(s);
     let el;
     if ((el = c('.cabide[data-peca], .card-peca[data-peca], .card-nome[data-peca]')) && ehArara(porId(el.dataset.peca)) && !calmo() && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey && !e.button) {
-      e.preventDefault(); abrirRoupaComZoom(el); return;
+      e.preventDefault(); abrirRoupaComZoom(el, e.detail ? { x: e.clientX, y: e.clientY } : null); return;
     }
     if ((el = c('[data-peca]'))) { origem = null; const a = $('.arte', el); if (a && !el.closest('#cena')) { const r = a.getBoundingClientRect(); origem = { left: r.left, top: r.top, width: r.width }; const viz = el.closest('.vizinho'), centro = $('#pdp-peca .arte'); if (viz && centro) { const rc = centro.getBoundingClientRect(); origem.lado = viz.classList.contains('vizinho-d') ? 'd' : 'e'; origem.centro = { left: rc.left, top: rc.top, width: rc.width }; } } }
     if ((el = c('[data-ver-dep]'))) { Object.assign(S.filtros, { dep: el.dataset.verDep, estilo: '', publico: '', cor: '', promo: false, q: '' }); }
