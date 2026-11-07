@@ -364,6 +364,55 @@
   /* Looks: composição com pontos numerados e lista de compra */
   const CHAVES_LOOK = Object.keys(LOOKS);
   let lookI = 0;
+  let trocaLookAtual = null;
+  async function trocarLook(passo) {
+    const contar = i => (i + CHAVES_LOOK.length) % CHAVES_LOOK.length;
+    if (trocaLookAtual) { trocaLookAtual.alvo = contar(trocaLookAtual.alvo + passo); return; }
+    let secao = $('#looks');
+    if (!secao) return;
+    const estado = { alvo: contar(lookI + passo) };
+    trocaLookAtual = estado;
+    const animar = (el, frames, duracao) => el.animate(frames, { duration: duracao, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'both' });
+    const esperar = animacoes => Promise.all(animacoes.map(a => a.finished.catch(() => {})));
+    try {
+      while (secao.isConnected && estado.alvo !== lookI) {
+        secao.setAttribute('aria-busy', 'true');
+        const palco = $('.looks-palco', secao), altura = palco.clientHeight + 50;
+        const links = $$('.looks-peca, .looks-ponto', secao);
+        links.forEach(el => { el.inert = true; });
+        if (!calmo()) await esperar([
+          ...links.map(el => animar(el, [{ transform: 'translateY(0)', opacity: 1 }, { transform: `translateY(-${altura}px)`, opacity: 0 }], 600)),
+          animar($('.looks-info', secao), [{ opacity: 1 }, { opacity: 0 }], 350)
+        ]);
+        if (!secao.isConnected) break;
+        // Durante a saída, cliques rápidos escolhem o destino mais recente.
+        let destino;
+        do {
+          destino = estado.alvo;
+          await Promise.all(LOOKS[CHAVES_LOOK[destino]].map(async ([id]) => {
+            const img = new Image(); img.src = porId(id).foto;
+            try { await img.decode(); } catch (_) { /* conserva o tratamento de erro das fotos */ }
+          }));
+        } while (destino !== estado.alvo && secao.isConnected);
+        if (!secao.isConnected) break;
+        const foco = document.activeElement?.closest('[data-look]')?.dataset.look;
+        secao.outerHTML = looksHTML(destino);
+        secao = $('#looks');
+        secao.setAttribute('aria-busy', 'true');
+        if (foco) $(`[data-look="${foco}"]`, secao)?.focus({ preventScroll: true });
+        const novas = $$('.looks-peca, .looks-ponto', secao);
+        novas.forEach(el => { el.inert = true; });
+        Mov.atualizar();
+        if (!calmo()) await esperar([
+          ...novas.map(el => animar(el, [{ transform: `translateY(${altura}px)`, opacity: 0 }, { transform: 'translateY(0)', opacity: 1 }], 750)),
+          animar($('.looks-info', secao), [{ opacity: 0 }, { opacity: 1 }], 500)
+        ]);
+        secao.getAnimations({ subtree: true }).filter(a => a.effect?.getTiming().fill === 'both' && a.playState === 'finished').forEach(a => a.cancel());
+        novas.forEach(el => { el.inert = false; });
+        secao.removeAttribute('aria-busy');
+      }
+    } finally { if (trocaLookAtual === estado) trocaLookAtual = null; }
+  }
   function looksHTML(i, troca) {
     lookI = (i + CHAVES_LOOK.length) % CHAVES_LOOK.length;
     const k = CHAVES_LOOK[lookI], e = ESTILOS[k], pecas = LOOKS[k].map(x => porId(x[0]));
@@ -1372,6 +1421,7 @@
   }
   function montarPalco() {
     const palco = $('#palco'); if (!palco) return;
+    if (palco.closest('.pdp-arara')) return;
     palco.addEventListener('pointermove', e => {
       if (calmo() || e.pointerType === 'touch') return;
       const r = palco.getBoundingClientRect();
@@ -1384,9 +1434,8 @@
   /* ---------- CÂMERA DA PAREDE ---------- */
   function pintarCorParede(p) {
     const cor = p && selDe(p).cor;
-    $$('.cena-tenis .tenis-fotografia img, .cena-tenis .tenis-aproximacao').forEach(foto => {
-      foto.style.filter = p && cor !== p.cores[0] ? `url(#${filtroCor(cor, p.cores[0])})` : '';
-    });
+    $$('.cena-tenis .tenis-fotografia img, .cena-tenis .tenis-aproximacao').forEach(foto => { foto.style.filter = ''; });
+    window.TenisCor.pintar(p, cor, p ? CORES[cor].a : '');
   }
   function prepararZoomTenis(p) {
     const parede = $('.cena-tenis .tenis-parede');
@@ -1605,32 +1654,24 @@
       app.animate([{ opacity: .25 }, { opacity: 1 }], { duration: 380, easing: 'ease-out' });
       return;
     }
-    /* As demais origens preservam sua transicao de entrada. */
+    /* A navegação lateral mantém o cabide na mesma altura. Não usa FLIP entre
+       caixas de proporções diferentes, nem reaproveita a escala da miniatura. */
+    if (flip && flip.centro) {
+      const palco = $('#palco');
+      const direcao = flip.lado === 'd' ? 1 : -1;
+      if (palco) palco.animate([
+        { opacity: .3, transform: `translateX(${direcao * 28}px)` },
+        { opacity: 1, transform: 'translateX(0)' }
+      ], { duration: 420, easing: 'cubic-bezier(.2,.7,.3,1)' });
+      return;
+    }
     const alvo = flip && $('#pdp-peca .arte');
     if (alvo) {
       const r = alvo.getBoundingClientRect();
       if (r.width) alvo.animate([
         { transformOrigin: '0 0', transform: `translate(${flip.left - r.left}px, ${flip.top - r.top}px) scale(${flip.width / r.width})` },
         { transformOrigin: '0 0', transform: 'none' }
-      ], { duration: 1000, easing: 'cubic-bezier(.3,.9,.2,1)' });
-    }
-    /* varal: a que estava na frente recua para o lado oposto e a próxima chega pelo lado clicado */
-    if (flip && flip.centro) {
-      const oposto = flip.lado === 'd' ? 'e' : 'd', caixa = $(`.vizinho-${oposto}`), chega = $(`.vizinho-${flip.lado}`), peca = caixa && $('.arte', caixa);
-      if (peca) {
-        const r = peca.getBoundingClientRect();
-        if (r.width) {
-          peca.animate([
-            { transformOrigin: '0 0', transform: `translate(${flip.centro.left - r.left}px, ${flip.centro.top - r.top}px) scale(${flip.centro.width / r.width})` },
-            { transformOrigin: '0 0', transform: 'none' }
-          ], { duration: 1000, easing: 'cubic-bezier(.3,.9,.2,1)' });
-          caixa.animate([{ opacity: 1 }, { opacity: .6 }], { duration: 1000, easing: 'ease-out' });
-        }
-      }
-      if (chega) chega.animate([
-        { opacity: 0, transform: `translateX(${flip.lado === 'd' ? 70 : -70}%)` },
-        { opacity: .6, transform: 'none' }
-      ], { duration: 900, delay: 180, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards' });
+      ], { duration: 650, easing: 'cubic-bezier(.3,.9,.2,1)' });
     }
   }
   function trocarRota() {
@@ -1701,6 +1742,7 @@
 
   /* ---------- EVENTOS ---------- */
   document.addEventListener('click', e => {
+    if (e.defaultPrevented) return;
     const t = e.target, c = s => t.closest(s);
     let el;
     if ((el = c('.cabide[data-peca], .card-peca[data-peca], .card-nome[data-peca]')) && ehArara(porId(el.dataset.peca)) && !calmo() && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey && !e.button) {
@@ -1716,7 +1758,7 @@
       aplicarFiltro(el.dataset.ns, el.dataset.foco, antes); return;
     }
     if ((el = c('[data-fb-limpar]'))) { const f = estadoFiltro(el.dataset.ns), antes = f.cor; f.publico = f.tam = f.cor = ''; if (el.dataset.ns === 'loja') { f.estilo = ''; f.promo = false; f.q = ''; } aplicarFiltro(el.dataset.ns, null, antes); return; }
-    if ((el = c('[data-look]'))) { $('#looks').outerHTML = looksHTML(lookI + (+el.dataset.look), true); revelar(); return; }
+    if ((el = c('[data-look]'))) { trocarLook(+el.dataset.look); return; }
     if ((el = c('[data-slide]'))) { trocarHero(+el.dataset.slide); const b = $(`[data-slide="${el.dataset.slide}"]`); if (b) b.focus(); iniciarTimerHero(); return; }
     if (c('#btn-sacola')) { abrirSacola(); return; }
     if (c('[data-fechar-sacola]') || c('#sombra')) { fecharSacola(); return; }
@@ -1916,6 +1958,8 @@
     if ($('#cena') && !$('#pdp') && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName) && $('#sacola').hidden && $('#busca').hidden && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) irTela(e.key === 'ArrowLeft' ? -1 : 1);
     if ($('#pdp') && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName) && $('#sacola').hidden && $('#busca').hidden) {
       if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        const vizinho = $(`.vizinho-${e.key === 'ArrowLeft' ? 'e' : 'd'}`);
+        if (vizinho) { e.preventDefault(); vizinho.click(); return; }
         const [a, b] = vizinhos(porId($('#pdp').dataset.id));
         const al = e.key === 'ArrowLeft' ? a : b; location.hash = 'p-' + al.id;
       }

@@ -267,6 +267,9 @@ fieldset { border: 0; min-width: 0; }
 .vizinho:hover { opacity: 1; transform: scale(1.06); }
 .pdp-arara .vizinho { top: 2px; bottom: auto; height: 62%; width: 30%; opacity: .6; align-items: flex-start; }
 .pdp-arara .vizinho .arte { transform-origin: 50% 2px; }
+.pdp-arara .pdp-peca { pointer-events: none; }
+.pdp-arara .vizinho { z-index: 3; }
+.pdp-arara .vizinho:hover { transform: none; }
 .pdp-arara .vizinho-e { left: -9%; }
 .pdp-arara .vizinho-d { right: -9%; }
 .compra { position: relative; z-index: 3; background: var(--branco); color: var(--tinta-base); padding: 20px 20px 22px; display: grid; gap: 16px; clip-path: var(--corte); align-self: start; min-width: 0; }
