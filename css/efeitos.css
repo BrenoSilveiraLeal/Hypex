@@ -80,8 +80,8 @@ details > summary::marker { content: ""; }
 [data-par] { translate: 0 var(--par, 0px); }
 
 /* ---------- magnetismo e pressão ---------- */
-.botao, .botao-sacola, .redondo, .topo-botao, .looks-mais, .looks-ponto, .link-parede, .voltar-colecao { transition: translate .35s var(--curva-saida), transform .35s var(--curva-saida), background .25s, color .25s, box-shadow .25s; }
-.botao:active, .botao-sacola:active, .opcao:active, .pilula:active, .redondo:active { scale: .96; }
+.botao, .redondo, .topo-botao, .looks-mais, .looks-ponto, .link-parede, .voltar-colecao { transition: translate .35s var(--curva-saida), transform .35s var(--curva-saida), background .25s, color .25s, box-shadow .25s; }
+.botao:active, .opcao:active, .pilula:active, .redondo:active { scale: .96; }
 .onda { position: absolute; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: currentColor; opacity: .3; pointer-events: none; animation: onda .72s ease-out forwards; z-index: 2; }
 @keyframes onda { to { transform: scale(26); opacity: 0; } }
 .opcao, .pilula, .frete, .metodo { position: relative; overflow: hidden; }

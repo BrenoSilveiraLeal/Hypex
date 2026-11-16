@@ -131,14 +131,14 @@ html[data-tom="escuro"] .topo.rolou { background: rgba(28, 28, 26, .62); }
 .cena.foco::before { background: radial-gradient(ellipse 70% 62% at 47% 72%, rgba(255, 150, 70, .1), transparent 72%), linear-gradient(180deg, rgba(0, 0, 0, .34), transparent 24%, transparent 72%, rgba(0, 0, 0, .5)); }
 /* painel do produto, sobre a parede */
 .cena-info, .cena .compra { position: absolute; z-index: 4; }
-.cena-info { left: var(--gut-e); top: 86px; width: min(320px, 25vw); display: grid; gap: 10px; }
+.cena-info { left: var(--gut-e); top: 86px; width: 23.4vw; display: grid; gap: 10px; }
 .voltar-colecao { display: inline-flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 600; text-decoration: none; min-height: 32px; }
 .voltar-colecao .ico { width: 16px; height: 16px; transition: transform .3s var(--curva-saida); }
 .voltar-colecao:hover .ico { transform: translateX(-4px); }
 .cena-info .mono { font-size: 10px; opacity: .72; }
-.cena-info .pdp-nome { font-weight: 600; font-size: clamp(30px, 3.4vw, 50px); letter-spacing: -.04em; text-transform: uppercase; }
-.cena-info .pdp-desc { font-size: 14px; color: rgba(255, 255, 255, .78); max-width: 34ch; }
-.cena .compra { right: var(--gut-d); top: 82px; width: min(320px, 26vw); max-height: calc(100% - 126px); overflow-y: auto; scrollbar-width: none; background: transparent; color: #fff; clip-path: none; padding: 0; gap: 14px; }
+.cena-info .pdp-nome { font-weight: 600; font-size: clamp(30px, 3.4vw, 72px); letter-spacing: -.04em; text-transform: uppercase; }
+.cena-info .pdp-desc { font-size: clamp(14px, 1.03vw, 22px); color: rgba(255, 255, 255, .78); max-width: 34ch; }
+.cena .compra { right: var(--gut-d); top: 82px; width: 23.4vw; max-height: calc(100% - 126px); overflow-y: auto; scrollbar-width: none; background: transparent; color: #fff; clip-path: none; padding: 0; gap: 14px; }
 .cena .compra::-webkit-scrollbar { display: none; }
 .cena .compra-topo { padding-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, .16); }
 .cena .compra-preco { font-family: var(--display); font-size: 24px; font-weight: 600; letter-spacing: -.03em; }
@@ -162,12 +162,12 @@ html[data-tom="escuro"] .topo.rolou { background: rgba(28, 28, 26, .62); }
 .tam-menu summary .ico { width: 18px; height: 18px; transition: transform .3s var(--curva-saida); }
 .tam-menu[open] summary .ico { transform: rotate(180deg); }
 .tam-menu .tamanhos { padding-top: 10px; animation: subir .4s var(--curva-saida) both; }
-.botao-sacola { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 9px 9px 9px 22px; border-radius: 999px; background: #D9D3C8; color: var(--tinta-base); text-align: left; transition: background .25s, transform .3s var(--curva-saida); }
-.botao-sacola:hover { background: #F0EBE1; transform: translateY(-2px); }
+.botao-sacola { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 9px 9px 9px 22px; border-radius: 999px; background: #D9D3C8; color: var(--tinta-base); text-align: left; transition: background .25s; }
+.botao-sacola:hover, .botao-sacola:active { transform: none; translate: none; scale: none; }
+.botao-sacola:hover { background: #F0EBE1; }
 .botao-sacola b { display: block; font-size: 14px; font-weight: 600; }
 .botao-sacola small { display: block; font-size: 11px; opacity: .7; }
-.botao-sacola > i { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--tinta-base); color: #fff; flex: none; transition: transform .45s var(--curva-saida), background .25s; }
-.botao-sacola:hover > i { transform: rotate(-10deg) scale(1.07); }
+.botao-sacola > i { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--tinta-base); color: #fff; flex: none; transition: background .25s; }
 .botao-sacola.feito > i { background: #2F6B50; }
 .compra-painel-entra > *, .cena-info-entra > * { animation: subir .75s var(--curva-saida) both; animation-delay: calc(var(--i, 0) * 60ms + .5s); }
 .cena-extra { background: var(--papel); }

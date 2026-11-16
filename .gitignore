@@ -1,0 +1,23 @@
+# Arquivos locais e relatórios gerados
+output/
+.playwright-cli/
+node_modules/
+.DS_Store
+Thumbs.db
+
+# Configuração local e credenciais
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+service-account*.json
+
+# Imagens legadas sem referência na interface
+img/tenis-detalhe/
+img/tenis-*-zoom-luz.webp
+img/tenis-luzes-*.svg
+img/tenis-variantes/*-produto.webp
