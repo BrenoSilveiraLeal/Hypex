@@ -1681,13 +1681,103 @@
     if (!contaLogada) return `<section class="conta-pagina guia"><p class="mono">SUA CONTA HYPEX</p><h1 class="titulo">Entre para acompanhar seus pedidos.</h1><p>Esta demonstracao salva as alteracoes neste navegador. Nenhuma compra ou pagamento real acontece.</p><div class="conta-login"><div><h2>Conta demonstrativa</h2><p>Cliente<br>${seguro(contaDemo.email)}</p><button class="botao" type="button" data-login-demo>Entrar como Cliente</button></div><div><h2>Ou criar perfil local</h2><label>Seu nome<input data-novo-nome autocomplete="name" placeholder="Como podemos te chamar?"></label><label>Seu e-mail<input data-novo-email type="email" autocomplete="email" placeholder="voce@email.com"></label><button class="botao botao-secundario" type="button" data-criar-perfil>Criar conta demonstrativa</button></div></div><a class="link" href="#inicio">Continuar vendo a loja</a></section>`;
     const pedidos = perfilDemo.pedidos || [];
     const avaliacoesCliente = perfilDemo.avaliacoes || contaDemo.avaliacoes;
-    return `<section class="conta-pagina guia"><header class="conta-cab"><div><p class="mono">AREA DA CONTA &middot; DEMONSTRACAO</p><h1 class="titulo">Olá, ${seguro(perfilDemo.nome.split(' ')[0])}.</h1><p>${seguro(perfilDemo.email)} &middot; <span>Dados locais de demonstracao</span></p></div><a class="link-parede" href="#loja">Continuar comprando</a></header>
-      <nav class="conta-abas"><a href="#conta">Visão geral</a><a href="#conta-pedidos">Pedidos (${pedidos.length})</a><a href="#conta-avaliacoes">Avaliações (${avaliacoesCliente.length})</a><a href="#conta-favoritos">Favoritos (${(perfilDemo.favoritos||[]).length})</a><a href="#conta-enderecos">Endereços (${(perfilDemo.enderecos||[]).length})</a></nav>
-      <div class="conta-resumo"><a href="#conta-pedidos"><strong>${pedidos.length}</strong><span>pedidos</span></a><a href="#conta-avaliacoes"><strong>${avaliacoesCliente.length}</strong><span>avaliações</span></a><a href="#conta-favoritos"><strong>${(perfilDemo.favoritos||[]).length}</strong><span>favoritos</span></a><a href="#conta-enderecos"><strong>${(perfilDemo.enderecos||[]).length}</strong><span>endereços salvos</span></a></div>
-      <section class="conta-bloco" id="conta-pedidos"><header class="conta-secao-cab"><div><p class="mono">ACOMPANHAMENTO</p><h2>Seus pedidos</h2></div></header>${pedidos.map(o=>`<article class="conta-pedido"><div><strong>Pedido ${seguro(o.id)}</strong><span>${seguro(o.estado)} - ${seguro(o.previsao)}</span><small>${o.itens.map(i=>seguro(porId(i.id)?.nome||i.id)).join(', ')}</small></div>${o.estado==='Entregue'&&!o.devolucao?`<button class="botao botao-secundario" data-devolucao="${seguro(o.id)}">Solicitar devolucao</button>`:o.devolucao?`<span class="conta-status">${seguro(o.devolucao)}</span>`:''}</article>`).join('')}</section>
-      <section class="conta-bloco conta-reviews" id="conta-avaliacoes"><header class="conta-secao-cab"><div><p class="mono">SUA EXPERIÊNCIA</p><h2>Avaliações que você fez</h2></div><span>${avaliacoesCliente.length} publicadas</span></header><div class="conta-avaliacoes">${avaliacoesCliente.map(a=>{const p=porId(a.produtoId);return p?`<article class="conta-avaliacao"><a href="#p-${p.id}"><img src="${p.fotoLeve}" alt=""><span><strong>${seguro(p.nome)}</strong><small>${seguro(a.data)}</small></span></a><span class="avaliacao-estrelas" aria-label="${a.estrelas} de 5 estrelas">${'★'.repeat(a.estrelas)}${'☆'.repeat(5-a.estrelas)}</span><p>${seguro(a.texto)}</p></article>`:''}).join('')}</div></section>
-      <div class="conta-duas"><section class="conta-bloco" id="conta-favoritos"><header class="conta-secao-cab"><div><p class="mono">LISTA PESSOAL</p><h2>Seus favoritos</h2></div><span>${(perfilDemo.favoritos||[]).length} itens</span></header><div class="conta-favs">${(perfilDemo.favoritos||[]).map(id=>{const p=porId(id);return p?`<a href="#p-${p.id}"><img src="${p.fotoLeve}" alt=""><span>${seguro(p.nome)}</span></a>`:''}).join('')}</div></section><section class="conta-bloco" id="conta-enderecos"><header class="conta-secao-cab"><div><p class="mono">ENTREGA</p><h2>Endereço de entrega</h2></div></header>${(perfilDemo.enderecos||[]).map(e=>`<p><strong>${seguro(e.apelido)}</strong><br>${seguro(e.rua)}, ${seguro(e.numero)} - ${seguro(e.bairro)}<br>${seguro(e.cidade)} - ${seguro(e.uf)}, ${seguro(e.cep)}</p>`).join('')}<button type="button" class="link" data-editar-endereco>Adicionar endereço</button><div data-form-endereco hidden><input data-endereco-novo placeholder="Rua, número, bairro, cidade e CEP"><button type="button" class="botao" data-salvar-endereco>Salvar endereço</button></div></section></div>
-      <section class="conta-bloco"><h2>Seus dados</h2><p>${seguro(perfilDemo.nome)} - ${seguro(perfilDemo.telefone||'')}</p><p>Pedidos e devolucoes sao demonstrativos. Prazo e status ilustram como a conta funciona.</p></section></section>`;
+    const favoritos = (perfilDemo.favoritos || []).map(porId).filter(Boolean);
+    const enderecos = perfilDemo.enderecos || [];
+    const ABAS = [['', 'Visão geral', null], ['pedidos', 'Pedidos', pedidos.length], ['avaliacoes', 'Avaliações', avaliacoesCliente.length], ['favoritos', 'Favoritos', favoritos.length], ['enderecos', 'Endereços', enderecos.length]];
+    const hashAtual = decodeURIComponent(location.hash.slice(1));
+    const aba = ABAS.some(([k]) => k && hashAtual === `conta-${k}`) ? hashAtual.slice(6) : '';
+    const dois = n => String(n).padStart(2, '0');
+    const primeiroNome = seguro(perfilDemo.nome.split(' ')[0]);
+    const ETAPAS = ['Confirmado', 'Separado', 'Em trânsito', 'Entregue'];
+    const etapaDe = o => { const e = norm(o.estado || ''); return e.includes('entregue') ? 3 : e.includes('transito') ? 2 : e.includes('separ') ? 1 : 0; };
+    const totalDe = o => o.itens.reduce((s, i) => s + (porId(i.id)?.preco || 0) * (i.qtd || 1), 0);
+    const pecas = o => o.itens.reduce((s, i) => s + (i.qtd || 1), 0);
+    const trilha = o => { const k = etapaDe(o); return `<ol class="conta-trilha" style="--k:${k}" aria-label="Andamento: ${ETAPAS[k]}">${ETAPAS.map((t, i) => `<li class="${i < k ? 'feito' : i === k ? 'atual' : ''}"${i === k ? ' aria-current="step"' : ''}><i></i><span>${t}</span></li>`).join('')}</ol>`; };
+    const selo = o => `<span class="conta-selo${etapaDe(o) === 3 ? ' ok' : ''}">${seguro(o.estado)}</span>`;
+    const miniatura = (p, extra = '') => `<span class="conta-mini"${extra}><img src="${p.fotoLeve}" alt="" loading="lazy"></span>`;
+    const vazio = (titulo, texto, href, acao) => `<div class="conta-vazio"><p class="titulo-pequeno">${titulo}</p><p>${texto}</p><a class="botao botao-pequeno" href="${href}">${acao}</a></div>`;
+    const cabSecao = (sobre, titulo, extra = '') => `<header class="conta-secao-cab"><div><p class="mono">${sobre}</p><h2 class="titulo">${titulo}</h2></div>${extra}</header>`;
+    const enderecoTxt = e => [[e.rua, e.numero].filter(Boolean).join(', '), e.complemento, e.bairro].filter(Boolean).map(seguro).join(' · ') + `<br>${[e.cidade, e.uf].filter(Boolean).map(seguro).join(' - ')}${e.cep ? ` · CEP ${seguro(e.cep)}` : ''}`;
+
+    const pedidoHTML = o => {
+      const itens = o.itens.map(i => ({ i, p: porId(i.id) })).filter(x => x.p);
+      const acao = o.devolucao ? `<span class="conta-nota">${icone('check')}${seguro(o.devolucao)}</span>`
+        : etapaDe(o) === 3 ? `<button type="button" class="pilula" data-devolucao="${seguro(o.id)}">Solicitar devolução</button>` : '';
+      return `<article class="conta-pedido">
+        <header class="conta-pedido-cab"><div><p class="mono">Pedido ${seguro(o.id)}</p><p class="conta-pedido-data">Feito em ${seguro(o.data || '')}</p></div>${selo(o)}</header>
+        <div class="conta-pedido-meio"><div><p class="titulo-pequeno">${etapaDe(o) === 3 ? seguro(o.previsao) : `Chega entre ${seguro(String(o.previsao || '').replace(/^Entregue em /, ''))}`}</p>${trilha(o)}</div></div>
+        <ul class="conta-itens">${itens.map(({ i, p }) => `<li><a href="#p-${p.id}">${miniatura(p)}<span><strong>${seguro(p.nome)}</strong><small>${[CORES[i.cor]?.nome, i.tam && `Tam. ${seguro(i.tam)}`, `${i.qtd || 1} un.`].filter(Boolean).join(' · ')}</small></span></a><span class="conta-item-preco">${R$(p.preco * (i.qtd || 1))}</span></li>`).join('')}</ul>
+        <footer class="conta-pedido-pe"><p><span class="mono">${dois(pecas(o))} ${pecas(o) === 1 ? 'peça' : 'peças'}</span><strong>${R$(totalDe(o))}</strong></p>${acao}</footer>
+      </article>`;
+    };
+    const avaliacaoHTML = a => { const p = porId(a.produtoId); return p ? `<article class="conta-avaliacao">
+        <a class="conta-avaliacao-peca" href="#p-${p.id}"><img src="${p.fotoLeve}" alt="" loading="lazy"></a>
+        <div><div class="conta-avaliacao-cab"><a href="#p-${p.id}" class="titulo-pequeno">${seguro(p.nome)}</a><span class="avaliacao-estrelas" aria-label="${a.estrelas} de 5 estrelas">${'★'.repeat(a.estrelas)}${'☆'.repeat(5 - a.estrelas)}</span></div>
+        <p class="conta-avaliacao-txt">“${seguro(a.texto)}”</p><p class="mono">${seguro(a.data)}</p></div>
+      </article>` : ''; };
+    const enderecoHTML = (e, i) => `<article class="conta-endereco${i === 0 ? ' principal' : ''}">
+        <header><p class="titulo-pequeno">${seguro(e.apelido || 'Endereço')}</p>${i === 0 ? '<span class="conta-selo">Principal</span>' : ''}</header>
+        <p>${enderecoTxt(e)}</p>
+        <footer><button type="button" class="link" data-remover-endereco="${seguro(e.id)}">Remover</button></footer>
+      </article>`;
+    const formEndereco = `<form class="conta-form" data-form-endereco hidden>
+        <p class="titulo-pequeno">Novo endereço</p>
+        <div class="conta-campos">
+          <label class="largo">Apelido<input name="apelido" placeholder="Casa, trabalho..." maxlength="30"></label>
+          <label>CEP<input name="cep" inputmode="numeric" autocomplete="postal-code" placeholder="00000-000" maxlength="9" required></label>
+          <label class="largo">Rua<input name="rua" autocomplete="address-line1" required></label>
+          <label>Número<input name="numero" inputmode="numeric" required></label>
+          <label>Complemento<input name="complemento" autocomplete="address-line2"></label>
+          <label>Bairro<input name="bairro" required></label>
+          <label>Cidade<input name="cidade" autocomplete="address-level2" required></label>
+          <label>UF<input name="uf" autocomplete="address-level1" maxlength="2" required></label>
+        </div>
+        <div class="conta-form-acoes"><button type="submit" class="botao botao-pequeno">Salvar endereço</button><button type="button" class="link" data-cancelar-endereco>Cancelar</button></div>
+      </form>`;
+
+    let painel;
+    if (aba === 'pedidos') painel = `${cabSecao('Acompanhamento', 'Seus pedidos', `<span class="mono">${dois(pedidos.length)} no total</span>`)}
+      <div class="conta-pedidos">${pedidos.length ? pedidos.map(pedidoHTML).join('') : vazio('Nenhum pedido ainda.', 'Quando você finalizar uma compra, ela aparece aqui com o andamento da entrega.', '#loja', 'Ver a loja')}</div>`;
+    else if (aba === 'avaliacoes') painel = `${cabSecao('Sua experiência', 'Avaliações que você fez', `<span class="mono">${dois(avaliacoesCliente.length)} publicadas</span>`)}
+      <div class="conta-avaliacoes">${avaliacoesCliente.length ? avaliacoesCliente.map(avaliacaoHTML).join('') : vazio('Você ainda não avaliou nada.', 'Avalie uma peça na página dela e a sua opinião aparece aqui.', '#loja', 'Ver a loja')}</div>`;
+    else if (aba === 'favoritos') painel = `${cabSecao('Lista pessoal', 'Seus favoritos', `<span class="mono">${dois(favoritos.length)} ${favoritos.length === 1 ? 'peça' : 'peças'}</span>`)}
+      ${favoritos.length ? `<div class="grade conta-grade">${favoritos.map((p, i) => `<div class="conta-fav">${cardHTML(p, i)}<button type="button" class="conta-fav-tirar" data-remover-fav="${p.id}" aria-label="Tirar ${seguro(p.nome)} dos favoritos">${icone('fechar')}</button></div>`).join('')}</div>` : vazio('Sua lista está vazia.', 'Toque em “Adicionar aos favoritos” na página de uma peça para guardá-la aqui.', '#loja', 'Ver a loja')}`;
+    else if (aba === 'enderecos') painel = `${cabSecao('Entrega', 'Endereços salvos', `<span class="mono">${dois(enderecos.length)} salvos</span>`)}
+      <div class="conta-enderecos">${enderecos.map(enderecoHTML).join('')}<button type="button" class="conta-endereco conta-endereco-novo" data-editar-endereco>${icone('mais')}<span>Adicionar endereço</span></button></div>${formEndereco}`;
+    else {
+      const ativo = pedidos.find(o => etapaDe(o) < 3) || pedidos[0];
+      const destaque = ativo ? `<article class="conta-destaque">
+          <header><p class="mono">${etapaDe(ativo) < 3 ? 'Pedido a caminho' : 'Último pedido'} · ${seguro(ativo.id)}</p>${selo(ativo)}</header>
+          <p class="conta-destaque-titulo">${etapaDe(ativo) === 3 ? seguro(ativo.previsao) : `Chega entre<br>${seguro(String(ativo.previsao || ''))}`}</p>
+          ${trilha(ativo)}
+          <footer><div class="conta-pilha">${ativo.itens.map(i => porId(i.id)).filter(Boolean).slice(0, 3).map(p => miniatura(p)).join('')}<span>${dois(pecas(ativo))} ${pecas(ativo) === 1 ? 'peça' : 'peças'} · ${R$(totalDe(ativo))}</span></div><a class="botao botao-claro botao-pequeno" href="#conta-pedidos">Ver pedidos</a></footer>
+        </article>` : `<article class="conta-destaque"><p class="mono">Pedidos</p><p class="conta-destaque-titulo">Nenhum pedido<br>por enquanto.</p><footer><span></span><a class="botao botao-claro botao-pequeno" href="#loja">Ver a loja</a></footer></article>`;
+      const numeros = ABAS.slice(1).map(([k, t, n]) => `<a href="#conta-${k}"><span>${t}</span><strong>${dois(n)}</strong>${icone('dir')}</a>`).join('');
+      const principal = enderecos[0];
+      painel = `<div class="conta-visao">
+          ${destaque}
+          <nav class="conta-numeros" aria-label="Atalhos da conta">${numeros}</nav>
+        </div>
+        <section class="conta-secao">${cabSecao('Lista pessoal', 'Seus favoritos', favoritos.length ? '<a class="link-parede" href="#conta-favoritos">Ver todos' + icone('dir') + '</a>' : '')}
+          ${favoritos.length ? `<div class="grade conta-grade">${favoritos.slice(0, 4).map((p, i) => cardHTML(p, i)).join('')}</div>` : vazio('Sua lista está vazia.', 'Guarde as peças que você gostou para achar depois.', '#loja', 'Ver a loja')}
+        </section>
+        <div class="conta-duas">
+          <section class="conta-cartao">${cabSecao('Entrega', 'Endereço principal', '<a class="link" href="#conta-enderecos">Gerenciar</a>')}
+            ${principal ? `<p>${enderecoTxt(principal)}</p>` : '<p>Nenhum endereço salvo.</p>'}</section>
+          <section class="conta-cartao">${cabSecao('Perfil', 'Seus dados')}
+            <dl class="conta-dados"><div><dt>Nome</dt><dd>${seguro(perfilDemo.nome)}</dd></div><div><dt>E-mail</dt><dd>${seguro(perfilDemo.email)}</dd></div><div><dt>Telefone</dt><dd>${seguro(perfilDemo.telefone || '—')}</dd></div></dl></section>
+        </div>`;
+    }
+    return `<section class="conta-pagina guia" data-tom="claro">
+      <header class="conta-cab">
+        <div class="conta-quem"><span class="conta-avatar" aria-hidden="true">${seguro(perfilDemo.nome.trim().charAt(0).toUpperCase())}</span>
+          <div><p class="mono">Sua conta Hypex</p><h1 class="titulo-dep">Olá, ${primeiroNome}.</h1></div></div>
+        <div class="conta-cab-d"><p class="mono">Dados de demonstração, salvos neste navegador</p><a class="botao botao-pequeno" href="#loja">Continuar comprando ${icone('dir')}</a></div>
+      </header>
+      <nav class="abas conta-abas" aria-label="Seções da conta">${ABAS.map(([k, t, n]) => `<a class="aba${aba === k ? ' ativa' : ''}" href="#conta${k ? '-' + k : ''}"${aba === k ? ' aria-current="page"' : ''}>${t}${n == null ? '' : `<sup>${dois(n)}</sup>`}</a>`).join('')}<span class="aba-barra" aria-hidden="true"></span></nav>
+      <div class="conta-painel" data-aba="${aba || 'geral'}">${painel}</div>
+      <p class="conta-rodape">Pedidos, prazos e devoluções desta área são demonstrativos. Nenhuma compra real acontece.</p>
+    </section>`;
   }
   function telaPedido() {
     const o = S.pedido;
@@ -2254,6 +2344,7 @@
     montarParedes(); montarPalco(); montarVitrine(); ligarHero(); iniciarTimerHero(); montarCena(animar);
     revelar(); aoRolar(); Mov.atualizar();
     if (h === 'pedido') confete();
+    if (h === 'conta' || h.startsWith('conta-')) posicionarBarraConta(false);
     return h;
   }
   function entrada(flip) {
@@ -2366,6 +2457,34 @@
     }, duracao);
     return true;
   }
+  /* barra preta das abas da conta: um só elemento que desliza até a aba atual */
+  function posicionarBarraConta(animar) {
+    const nav = $('.conta-abas'); if (!nav) return;
+    const barra = $('.aba-barra', nav), ativa = $('.aba.ativa', nav); if (!barra || !ativa) return;
+    if (!animar) barra.style.transition = 'none';
+    barra.style.setProperty('--x', `${ativa.offsetLeft}px`);
+    barra.style.setProperty('--w', `${ativa.offsetWidth}px`);
+    if (!animar) { void barra.offsetWidth; barra.style.transition = ''; }
+  }
+  addEventListener('resize', () => posicionarBarraConta(false));
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => posicionarBarraConta(false));
+  /* troca de aba da conta: o cabeçalho "Olá, Cliente." fica parado, só o painel muda */
+  function trocarAbaConta() {
+    const nova = document.createElement('template');
+    nova.innerHTML = telaConta();
+    const painelNovo = $('.conta-painel', nova.content), painel = $('.conta-painel');
+    if (!painel || !painelNovo) { rotaAtual = desenharRota(false); return; }
+    const antigas = $$('.conta-abas .aba'), novas = $$('.aba', nova.content);
+    antigas.forEach((a, i) => {
+      if (!novas[i]) return;
+      a.className = novas[i].className; a.innerHTML = novas[i].innerHTML;
+      if (novas[i].hasAttribute('aria-current')) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    });
+    painel.replaceWith(painelNovo);
+    posicionarBarraConta(!calmo());
+    revelar(); aoRolar(); Mov.atualizar();
+    rotaAtual = decodeURIComponent(location.hash.slice(1)) || 'conta';
+  }
   function trocarRota() {
     const mostruarioAberto = $('[data-mostruario]:not([hidden])');
     if (mostruarioAberto) fecharMostruario(mostruarioAberto, true, false);
@@ -2377,6 +2496,8 @@
     }
     scrolls[rotaAtual] = scrollY;
     const destino = location.hash.slice(1) || 'inicio';
+    /* abas da conta: troca só o painel, sem cortina */
+    if (/^conta(-|$)/.test(rotaAtual) && /^conta(-|$)/.test(destino)) { trocarAbaConta(); return; }
     const p = destino.startsWith('p-') ? porId(destino.slice(2)) : null;
     const vitrine = DEPARTAMENTOS[destino] && DEPARTAMENTOS[destino].exp === 'prateleira' && (S.modoDep[destino] || 'vitrine') === 'vitrine';
     const depCena = p && !ehArara(p) ? p.dep : (vitrine ? destino : null);
@@ -2516,8 +2637,10 @@
     }
     if (c('[data-sair-demo]')) { contaLogada = false; guardar('contaLogada', false); desenharRota(false); return; }
     if ((el = c('[data-devolucao]'))) { const p = perfilDemo.pedidos.find(x => x.id === el.dataset.devolucao); if (p) { p.devolucao = 'Solicitacao de devolucao registrada'; guardar('perfilDemo', perfilDemo); desenharRota(false); } return; }
-    if (c('[data-editar-endereco]')) { const f = $('[data-form-endereco]'); if(f) f.hidden = false; return; }
-    if (c('[data-salvar-endereco]')) { const v = $('[data-endereco-novo]')?.value.trim(); if(!v){toast('Informe o endereco.');return;} perfilDemo.enderecos.push({id:Date.now(),apelido:'Novo endereco',rua:v,numero:'',bairro:'',cidade:'',uf:'',cep:''}); guardar('perfilDemo',perfilDemo); desenharRota(false); return; }
+    if (c('[data-editar-endereco]')) { const f = $('[data-form-endereco]'); if (f) { f.hidden = false; f.elements.apelido.focus(); f.scrollIntoView({ block: 'nearest', behavior: calmo() ? 'auto' : 'smooth' }); } return; }
+    if (c('[data-cancelar-endereco]')) { const f = $('[data-form-endereco]'); if (f) { f.reset(); f.hidden = true; } return; }
+    if ((el = c('[data-remover-endereco]'))) { perfilDemo.enderecos = (perfilDemo.enderecos || []).filter(e => String(e.id) !== el.dataset.removerEndereco); guardar('perfilDemo', perfilDemo); desenharRota(false); toast('Endereço removido.'); return; }
+    if ((el = c('[data-remover-fav]'))) { perfilDemo.favoritos = (perfilDemo.favoritos || []).filter(x => x !== el.dataset.removerFav); guardar('perfilDemo', perfilDemo); desenharRota(false); toast('Peça tirada dos favoritos.'); return; }
     if (c('#btn-sacola')) { abrirSacola(); return; }
     if (c('[data-fechar-sacola]') || c('#sombra')) { fecharSacola(); return; }
     if (c('[data-fecha-sacola]')) fecharSacola();
@@ -2708,6 +2831,11 @@
     const f = e.target;
     if (f.matches('[data-form-cupom]')) { tentarCupom(f.cupom.value); return; }
     if (f.id === 'form-busca') { aplicarBusca(); return; }
+    if (f.matches('[data-form-endereco]')) {
+      const v = n => f.elements[n].value.trim();
+      perfilDemo.enderecos = [...(perfilDemo.enderecos || []), { id: Date.now(), apelido: v('apelido') || 'Novo endereço', cep: v('cep'), rua: v('rua'), numero: v('numero'), complemento: v('complemento'), bairro: v('bairro'), cidade: v('cidade'), uf: v('uf').toUpperCase() }];
+      guardar('perfilDemo', perfilDemo); desenharRota(false); toast('Endereço salvo.'); return;
+    }
     if (f.matches('[data-form-avaliacao]')) {
       const sec = f.closest('[data-produto-avaliacoes]'), id = sec?.dataset.produtoAvaliacoes;
       const erro = $('[data-avaliacao-erro]', f), arquivos = [...(f.elements.fotos.files || [])];
