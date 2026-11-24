@@ -26,6 +26,17 @@
     escuro:    { nome: 'Jeans escuro', a: '#1E2F52', b: '#14213B', c: '#F2C879', fundo: '#D9D6CF', tinta: '#1A1A1C', familia: 'Azul' }
   };
 
+  /* Vitrine de cor (página de cada roupa): fundo e texto que entram quando a pessoa escolhe a cor.
+     O fundo contrasta com a peça; para mudar o fundo de uma peça só, use "vitrine" no produto. */
+  const CLARO = '#141416', ESCURO = '#F3F2EF';
+  const VITRINE = {
+    cafe: ['#D8CFC4', CLARO], prata: ['#2B2E33', ESCURO], tangerina: ['#231D1A', ESCURO], arara: ['#E6DCD6', CLARO],
+    canario: ['#1E1D1A', ESCURO], cobalto: ['#D3D9E4', CLARO], turquesa: ['#CFDAD9', CLARO], mata: ['#1A211E', ESCURO],
+    limao: ['#E3E2D3', CLARO], lavanda: ['#2A2630', ESCURO], violeta: ['#DDD6E1', CLARO], chiclete: ['#2D2425', ESCURO],
+    vinho: ['#2B2427', ESCURO], areia: ['#3A342C', ESCURO], grafite: ['#D5D8DB', CLARO], neve: ['#66737F', '#FFFFFF'],
+    jeans: ['#E4E1DA', CLARO], escuro: ['#D6D9DE', CLARO]
+  };
+
   const DEPARTAMENTOS = {
     tenis:      { nome: 'Tênis', exp: 'prateleira', cor: '#34332F', tinta: '#FFFFFF', frase: 'Uma outra perspectiva.' },
     meias:      { nome: 'Meias', exp: 'arara', cor: '#E4E5E2', tinta: '#1A1A1C', frase: 'A menor peça do look, e a que mais aparece.' },
@@ -319,5 +330,5 @@
   const FRETE_GRATIS_A_PARTIR = 29900;
   const DESCONTO_PIX = .05;
 
-  window.Loja = { CORES, DEPARTAMENTOS, ESTILOS, PRODUTOS, CUPONS, FRETE_GRATIS_A_PARTIR, DESCONTO_PIX };
+  window.Loja = { CORES, VITRINE, DEPARTAMENTOS, ESTILOS, PRODUTOS, CUPONS, FRETE_GRATIS_A_PARTIR, DESCONTO_PIX };
 })();

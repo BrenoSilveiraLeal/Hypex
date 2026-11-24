@@ -2,30 +2,30 @@
    A fotografia contém parede, tênis, prateleiras e suas sombras. */
 .cena-voltar {
   position: absolute;
-  top: 82px;
+  top: 5.125rem;
   left: var(--gut-e);
   z-index: 10;
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  min-height: 44px;
-  padding: 0 18px;
-  border-radius: 24px;
+  gap: 0.5625rem;
+  min-height: 2.75rem;
+  padding: 0 1.125rem;
+  border-radius: 1.5rem;
   background: #f3f2ef;
   color: #262622;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 600;
   text-decoration: none;
 }
-.cena-voltar .ico { width: 16px; height: 16px; }
+.cena-voltar .ico { width: 1rem; height: 1rem; }
 .cena-voltar:hover { background: #fff; }
-.cena:has(.cena-voltar) .cena-info { top: 148px; }
+.cena:has(.cena-voltar) .cena-info { top: 9.25rem; }
 @media (max-width: 860px) {
-  .cena-voltar { top: 126px; left: 20px; font-size: 12px; }
+  .cena-voltar { top: 7.875rem; left: 1.25rem; font-size: 0.75rem; }
 }
 .parede-tenis, .cena-tenis {
   background: #353330 url('../img/tenis-textura.webp') center / cover;
-  height: max(100svh, 560px);
+  height: max(100svh, 35rem);
   padding: 0;
   overflow: hidden;
   color: #f0ece5;
@@ -45,7 +45,7 @@
 .cena-tenis[data-parede] .cena-janela {
   background-image: var(--tenis-zoom-wall, url('../img/tenis-textura.webp'));
   background-size: 100vw 55.814vw;
-  background-position: 0 calc(max(100svh, 560px) / 2 - 27.907vw);
+  background-position: 0 calc(max(100svh, 35rem) / 2 - 27.907vw);
   background-repeat: no-repeat;
 }
 @property --fora { syntax: '<number>'; inherits: false; initial-value: 1; }
@@ -150,31 +150,31 @@ body:has(.cena-tenis) #cursor { display: none; }
 .tenis-parede .nicho-peca .arte { opacity: 0; animation: none; transition: opacity .45s; }
 .tenis-parede .plaquinha {
   position: absolute;
-  top: calc(100% + 18px);
+  top: calc(100% + 1.125rem);
   display: grid;
-  gap: 3px;
+  gap: 0.1875rem;
   width: 100%;
   padding: 0;
   opacity: 0;
   text-align: center;
   transition: opacity .2s;
 }
-.tenis-parede .plaquinha-nome { font-size: 10px; color: #e8bf98; }
-.tenis-parede .plaquinha-preco { font-size: 9px; color: #e8dfd2; }
+.tenis-parede .plaquinha-nome { font-size: 0.625rem; color: #e8bf98; }
+.tenis-parede .plaquinha-preco { font-size: 0.5625rem; color: #e8dfd2; }
 .tenis-modelo:hover .plaquinha, .tenis-modelo:focus-visible .plaquinha { opacity: 1; }
-.parede-tenis .parede-cab { position: absolute; inset: 112px var(--gut-d) auto var(--gut-e); z-index: 3; width: auto; max-width: none; padding: 0; margin: 0; pointer-events: none; }
-.parede-tenis .parede-cab .mono, .cena-tenis .cena-titulo .mono { color: #d5bfa8; font-size: 8px; letter-spacing: .17em; margin-bottom: 13px; opacity: 1; }
-.parede-tenis .titulo, .cena-tenis .cena-titulo h1 { font: 500 29px/1.1 var(--display); letter-spacing: -.04em; }
-.parede-tenis .link-parede { position: absolute; right: 0; top: calc(max(100svh, 560px) - 160px); pointer-events: auto; font-size: 11px; font-weight: 400; }
-.cena-tenis .cena-titulo { top: 112px; }
+.parede-tenis .parede-cab { position: absolute; inset: 7rem var(--gut-d) auto var(--gut-e); z-index: 3; width: auto; max-width: none; padding: 0; margin: 0; pointer-events: none; }
+.parede-tenis .parede-cab .mono, .cena-tenis .cena-titulo .mono { color: #d5bfa8; font-size: 0.5rem; letter-spacing: .17em; margin-bottom: 0.8125rem; opacity: 1; }
+.parede-tenis .titulo, .cena-tenis .cena-titulo h1 { font: 500 1.8125rem/1.1 var(--display); letter-spacing: -.04em; }
+.parede-tenis .link-parede { position: absolute; right: 0; top: calc(max(100svh, 35rem) - 10rem); pointer-events: auto; font-size: 0.6875rem; font-weight: 400; }
+.cena-tenis .cena-titulo { top: 7rem; }
 .cena-tenis .cena-trilho { width: 100%; height: 100%; }
-.cena-tenis .cena-rodape { bottom: 22px; grid-template-columns: 1fr auto; font-size: 8px; }
+.cena-tenis .cena-rodape { bottom: 1.375rem; grid-template-columns: 1fr auto; font-size: 0.5rem; }
 .cena-tenis .cena-rodape > button { display: none; }
-.cena-tenis .cena-dica { margin-right: 135px; }
-.cena-tenis .tenis-filtros { top: auto; bottom: 20px; max-width: calc(100% - 48px); font-size: 10px; }
-.tenis-filtros summary { cursor: pointer; min-height: 28px; display: flex; align-items: center; justify-content: end; text-decoration: underline; text-underline-offset: 4px; }
-.tenis-filtros[open] { padding: 16px; background: #292725; }
-.tenis-filtros[open] summary { margin-bottom: 14px; }
+.cena-tenis .cena-dica { margin-right: 8.4375rem; }
+.cena-tenis .tenis-filtros { top: auto; bottom: 1.25rem; max-width: calc(100% - 3rem); font-size: 0.625rem; }
+.tenis-filtros summary { cursor: pointer; min-height: 1.75rem; display: flex; align-items: center; justify-content: end; text-decoration: underline; text-underline-offset: 0.25rem; }
+.tenis-filtros[open] { padding: 1rem; background: #292725; }
+.tenis-filtros[open] summary { margin-bottom: 0.875rem; }
 .cena-tenis.foco .tenis-fotografia { opacity: 1; }
 .cena-tenis .compra .detalhes { display: none; }
 @media (min-width: 861px) {
@@ -194,7 +194,7 @@ body:has(.cena-tenis) #cursor { display: none; }
     mask-image: linear-gradient(to right, transparent, #000 3%, #000 97%, transparent),
       linear-gradient(to bottom, transparent, #000 5%, #000 67%, transparent 72%);
   }
-  .parede-tenis, .cena-tenis { height: auto; min-height: 0; padding: 216px 0 58px; background-size: 100vw auto; }
+  .parede-tenis, .cena-tenis { height: auto; min-height: 0; padding: 13.5rem 0 3.625rem; background-size: 100vw auto; }
   .parede-tenis .tenis-panorama, .cena-tenis .pagina.tenis-panorama {
     position: relative;
     inset: auto;
@@ -204,24 +204,24 @@ body:has(.cena-tenis) #cursor { display: none; }
   }
   .tenis-parede .tenis-modelo { left: var(--xm); top: var(--ym); width: 50%; height: 20%; }
   .tenis-parede .nicho-peca { height: 80%; }
-  .tenis-parede .plaquinha { top: auto; bottom: 4%; display: flex; flex-direction: row; justify-content: space-between; padding: 0 18px; gap: 8px; opacity: 1; transform: none; }
-  .tenis-parede .plaquinha-nome, .tenis-parede .plaquinha-preco { font-size: 10px; letter-spacing: 0; text-transform: none; margin: 0; color: #ede6db; }
-  .parede-tenis .parede-cab { inset: 128px 22px auto; }
-  .parede-tenis .titulo, .cena-tenis .cena-titulo h1 { font-size: 29px; max-width: 280px; }
-  .parede-tenis .parede-cab .link-parede { position: absolute; top: auto; bottom: -42px; left: 0; right: auto; visibility: visible; font-size: 10px; }
-  .cena-tenis .cena-titulo { top: 132px; left: 22px; }
+  .tenis-parede .plaquinha { top: auto; bottom: 4%; display: flex; flex-direction: row; justify-content: space-between; padding: 0 1.125rem; gap: 0.5rem; opacity: 1; transform: none; }
+  .tenis-parede .plaquinha-nome, .tenis-parede .plaquinha-preco { font-size: 0.625rem; letter-spacing: 0; text-transform: none; margin: 0; color: #ede6db; }
+  .parede-tenis .parede-cab { inset: 8rem 1.375rem auto; }
+  .parede-tenis .titulo, .cena-tenis .cena-titulo h1 { font-size: 1.8125rem; max-width: 17.5rem; }
+  .parede-tenis .parede-cab .link-parede { position: absolute; top: auto; bottom: -2.625rem; left: 0; right: auto; visibility: visible; font-size: 0.625rem; }
+  .cena-tenis .cena-titulo { top: 8.25rem; left: 1.375rem; }
   .cena-tenis .camera { position: absolute; inset: 0; width: 100%; height: 100%; }
   .cena-tenis .cena-janela { height: 214.286vw; }
   .cena-tenis .cena-trilho { height: 100% !important; }
   .cena-tenis .cena-dica { display: none; }
-  .cena-tenis .cena-rodape { position: absolute; bottom: 12px; font-size: 8px; }
-  .cena-tenis .tenis-filtros { top: auto; left: auto; right: 22px; bottom: 12px; }
+  .cena-tenis .cena-rodape { position: absolute; bottom: 0.75rem; font-size: 0.5rem; }
+  .cena-tenis .tenis-filtros { top: auto; left: auto; right: 1.375rem; bottom: 0.75rem; }
   .cena-tenis.foco { padding: 0; }
-  .cena-tenis.foco .cena-janela { height: 460px; }
-  .cena-tenis.foco .cena-voltar { top: 116px; min-height: 28px; padding: 0; background: transparent; color: #f0ece5; font-size: 11px; }
-  .cena-tenis.foco .cena-info { position: absolute; z-index: 4; top: 151px; left: 20px; right: 20px; width: auto; padding: 0; gap: 4px; }
-  .cena-tenis.foco .cena-info .pdp-nome { font-size: 32px; }
-  .cena-tenis.foco .cena-info .pdp-desc { font-size: 12px; max-width: 32ch; }
+  .cena-tenis.foco .cena-janela { height: 28.75rem; }
+  .cena-tenis.foco .cena-voltar { top: 7.25rem; min-height: 1.75rem; padding: 0; background: transparent; color: #f0ece5; font-size: 0.6875rem; }
+  .cena-tenis.foco .cena-info { position: absolute; z-index: 4; top: 9.4375rem; left: 1.25rem; right: 1.25rem; width: auto; padding: 0; gap: 0.25rem; }
+  .cena-tenis.foco .cena-info .pdp-nome { font-size: 2rem; }
+  .cena-tenis.foco .cena-info .pdp-desc { font-size: 0.75rem; max-width: 32ch; }
   .cena-tenis.foco .tenis-modelo:not(.atual) { visibility: hidden; }
   .cena-tenis.foco .tenis-parede .plaquinha { opacity: 0; }
 }
@@ -229,4 +229,28 @@ body:has(.cena-tenis) #cursor { display: none; }
   /* Troca de cor continua visível; o fade só fica mais curto. */
   .tenis-aproximacao, .tenis-detalhe-cor, #pdp-peca .arte.troca-cor-entrada { transition-duration: .22s; }
   .tenis-fotografia, .tenis-parede .nicho-peca .arte, .tenis-parede .plaquinha { transition: none; }
+}
+
+/* ---------- parede contínua ----------
+   A foto de cada tênis tem proporção fixa (16:9) e é encaixada pela largura. Em janelas mais altas
+   que isso sobravam faixas de cinza liso em cima e embaixo, e a borda da foto aparecia como um corte.
+   Agora a própria parede, esticada e desfocada, preenche a tela toda; as bordas da foto esmaecem
+   nela, então a parede parece continuar até o fim. Em janelas mais largas que 16:9 nada muda,
+   porque a foto já passa das bordas. */
+@media (min-width: 861px) {
+  .cena-tenis[data-parede] {
+    --borda-parede: linear-gradient(to bottom, transparent 0, #000 2.75rem, #000 calc(100% - 2.75rem), transparent 100%);
+  }
+  .cena-tenis[data-parede]::before {
+    display: block; content: ''; position: absolute; inset: -2.5rem; z-index: 0; pointer-events: none;
+    background: var(--tenis-zoom-wall) center / 100% 100% no-repeat;
+    filter: blur(1.625rem);
+  }
+  .cena-tenis[data-parede] .cena-janela { background-color: transparent; }
+  .cena-tenis[data-parede] .tenis-detalhe,
+  .cena-tenis[data-parede] .tenis-detalhe-cor { -webkit-mask-image: var(--borda-parede); mask-image: var(--borda-parede); }
+  .cena-tenis[data-parede] .cena-janela {
+    -webkit-mask-image: linear-gradient(to bottom, transparent calc(max(100svh, 35rem) / 2 - 27.907vw), #000 calc(max(100svh, 35rem) / 2 - 27.907vw + 2.75rem), #000 calc(max(100svh, 35rem) / 2 + 27.907vw - 2.75rem), transparent calc(max(100svh, 35rem) / 2 + 27.907vw));
+    mask-image: linear-gradient(to bottom, transparent calc(max(100svh, 35rem) / 2 - 27.907vw), #000 calc(max(100svh, 35rem) / 2 - 27.907vw + 2.75rem), #000 calc(max(100svh, 35rem) / 2 + 27.907vw - 2.75rem), transparent calc(max(100svh, 35rem) / 2 + 27.907vw));
+  }
 }

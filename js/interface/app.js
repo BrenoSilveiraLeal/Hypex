@@ -1,7 +1,7 @@
 /* HYPEX · aplicação da loja: rotas, vitrines, sacola, cupons e checkout simulado */
 (function () {
   'use strict';
-  const { CORES, DEPARTAMENTOS, ESTILOS, PRODUTOS, CUPONS, FRETE_GRATIS_A_PARTIR, DESCONTO_PIX } = window.Loja;
+  const { CORES, VITRINE, DEPARTAMENTOS, ESTILOS, PRODUTOS, CUPONS, FRETE_GRATIS_A_PARTIR, DESCONTO_PIX } = window.Loja;
   const Arte = window.Arte;
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -13,7 +13,7 @@
     for (let i = 1; i <= 10; i++) {
       const imagem = new Image();
       imagem.decoding = 'async';
-      imagem.src = `img/tenis-detalhe-limpo/detalhe-${String(i).padStart(2, '0')}.webp?v=9`;
+      imagem.src = `img/tenis-detalhe-limpo/detalhe-${String(i).padStart(2, '0')}.webp?v=11`;
       detalhesTenis.push(imagem);
       const parede = new Image();
       parede.decoding = 'async';
@@ -387,25 +387,6 @@
     alfaiataria: [['blazer', 'vinho'], ['alfaiatada', 'grafite'], ['lua', 'neve']],
     praia: [['camisa', 'areia'], ['shorts', 'areia'], ['couro', 'neve']]
   };
-  function estilosHTML() {
-    return `<section class="estilos guia" aria-labelledby="titulo-est">
-      <h2 id="titulo-est" class="titulo">Escolha pelo estilo</h2>
-      <div class="estilos-faixas">${Object.entries(ESTILOS).map(([k, e]) => {
-        const [a, b, c] = LOOKS[k];
-        const pa = porId(a[0]), pb = porId(b[0]), pc = porId(c[0]);
-        const tinta = Arte.contra(e.cor);
-        return `<a class="estilo" href="#estilo-${k}" style="--fundo:${e.cor};--tinta:${tinta}">
-          <span class="estilo-look" aria-hidden="true">
-            <span class="look-a">${pa.foto ? fotoHTML(pa, pa.cores[0]) : Arte.desenhar(pa.art, CORES[a[1]], Object.assign({}, pa.o, { cabide: false }))}</span>
-            <span class="look-b">${pb.foto ? fotoHTML(pb, pb.cores[0]) : Arte.desenhar(pb.art, CORES[b[1]], pb.o)}</span>
-            <span class="look-c">${pc.foto ? fotoHTML(pc, pc.cores[0]) : Arte.desenhar(pc.art, CORES[c[1]], pc.o)}</span>
-          </span>
-          <span class="estilo-texto"><strong>${e.nome}</strong><span>${e.frase}</span></span>
-        </a>`;
-      }).join('')}</div>
-    </section>`;
-  }
-
   function telaInicio() {
     const araraMix = ['pesada', 'capuzzip', 'puffer', 'blazer', 'jeansreta', 'aurora', 'polo', 'vestido', 'cargo', 'listrada', 'saia', 'jaquetajeans'];
     return heroHTML(true) + letreiroHTML() +
@@ -886,27 +867,146 @@
     const l = doDep(p.dep), i = l.indexOf(p);
     return [l[(i - 1 + l.length) % l.length], l[(i + 1) % l.length]];
   }
+  /* ---------- VITRINE DE COR ----------
+     A página de cada roupa: o nome da cor em letras grandes, o fundo que muda com a cor e um
+     estouro de neve que esconde a troca. Tamanho, modelo e compra abrem numa gaveta lateral. */
+  let vitrineFx = null, vitrineVez = 0;
+  const tomVitrine = (p, k) => (p.vitrine && p.vitrine[k]) || VITRINE[k] || [CORES[k].fundo, CORES[k].tinta];
+  const tomDeTinta = tinta => Arte.lum(tinta) > .5 ? 'escuro' : 'claro';
+  const maiorPalavra = t => Math.max(...t.split(' ').map(w => w.length));
+  const nomeEmLetras = t => t.split(' ').map(w => `<span class="p">${[...w].map(l => `<span class="l">${seguro(l)}</span>`).join('')}</span>`).join(' ');
+  function vitrineHTML(p) {
+    const s = selDe(p), [fundo, tinta] = tomVitrine(p, s.cor), dep = DEPARTAMENTOS[p.dep], [ant, prox] = vizinhos(p);
+    const ordem = String(doDep(p.dep).indexOf(p) + 1).padStart(2, '0');
+    return `<section class="vitrine-cor" id="vitrine" data-id="${p.id}" data-modelo="${s.modelo}" data-tom="${tomDeTinta(tinta)}" style="--v-fundo:${fundo};--v-tinta:${tinta}" aria-label="${seguro(p.nome)} em ${p.cores.length} cores">
+      <div class="vitrine-onda" aria-hidden="true"></div>
+      <span class="vitrine-marca" aria-hidden="true">HYPEX</span>
+      <canvas class="vitrine-neve" aria-hidden="true"></canvas>
+      <div class="vitrine-texto">
+        <p class="mono vitrine-sobre"><a href="#${p.dep}">${dep.nome}</a> / ${ordem} · ${p.cores.length} ${p.cores.length === 1 ? 'cor' : 'cores'}</p>
+        <h1 class="vitrine-titulo">${seguro(p.nome)}</h1>
+        <p class="vitrine-nome" aria-hidden="true" style="--n:${maiorPalavra(CORES[s.cor].nome)}">${nomeEmLetras(CORES[s.cor].nome)}</p>
+        <p class="sr" id="vitrine-anuncio" aria-live="polite">Cor ${CORES[s.cor].nome}</p>
+        <p class="vitrine-desc">${seguro(p.desc)}</p>
+        <p class="vitrine-preco">${preco(p)} <small>${parcelaTxt(p.preco)}</small></p>
+        <button type="button" class="botao vitrine-botao" data-vitrine-ir aria-haspopup="dialog" aria-controls="pdp">Escolher tamanho ${icone('dir')}</button>
+      </div>
+      <div class="vitrine-peca" id="vitrine-peca">${fotoHTML(p, s.cor, true, s.modelo)}</div>
+      <div class="vitrine-cores" role="group" aria-label="Cores do ${seguro(p.nome)}">
+        ${p.cores.map(k => `<button type="button" class="vitrine-opcao${k === s.cor ? ' ativa' : ''}" data-vitrine-cor="${k}" aria-pressed="${k === s.cor}">
+          <span class="vitrine-mini" style="--c:${tomVitrine(p, k)[0]}">${fotoHTML(p, k, false, s.modelo)}</span>
+          <span class="vitrine-rotulo"><b>${CORES[k].nome}</b><small>${R$(p.preco)}</small></span>
+        </button>`).join('')}
+      </div>
+      <ul class="vitrine-detalhes mono">${p.detalhes.map(d => `<li>${seguro(d)}</li>`).join('')}</ul>
+      <nav class="vitrine-nav mono" aria-label="Outras peças de ${dep.nome}">
+        <a href="#p-${ant.id}" aria-label="Peça anterior: ${seguro(ant.nome)}">${icone('esq')}<span>${seguro(ant.nome)}</span></a>
+        <a href="#p-${prox.id}" aria-label="Próxima peça: ${seguro(prox.nome)}"><span>${seguro(prox.nome)}</span>${icone('dir')}</a>
+      </nav>
+    </section>`;
+  }
+  /* gaveta de compra: o mesmo formulário de antes (tamanho, modelo, no modelo, detalhes) */
+  function gavetaHTML(p) {
+    const dep = DEPARTAMENTOS[p.dep];
+    return `<div class="gaveta-sombra" data-gaveta-fechar hidden></div>
+    <aside class="gaveta-compra" id="pdp" data-id="${p.id}" role="dialog" aria-modal="true" aria-labelledby="gaveta-titulo" hidden>
+      <header class="gaveta-cab">
+        <div><p class="mono">${dep.nome} · Sua escolha</p><h2 class="gaveta-titulo" id="gaveta-titulo">${seguro(p.nome)}</h2></div>
+        <button type="button" class="redondo" data-gaveta-fechar aria-label="Fechar">${icone('fechar')}</button>
+      </header>
+      ${compraHTML(p)}
+      <div class="pdp-tags">${p.estilos.map(e => `<a class="pilula" href="#estilo-${e}">${ESTILOS[e].nome}</a>`).join('')}<span class="pilula pilula-fixa">${p.publico}</span></div>
+    </aside>`;
+  }
+  let gavetaFoco = null, gavetaT = 0;
+  const gavetaAberta = () => !!$('.gaveta-compra.aberta');
+  function abrirGaveta() {
+    const g = $('.gaveta-compra'), sombra = $('.gaveta-sombra'); if (!g || !g.hidden) return;
+    clearTimeout(gavetaT);
+    gavetaFoco = document.activeElement;
+    g.hidden = false; sombra.hidden = false;
+    $$('#miolo > *:not(#app), #app > *:not(.gaveta-compra):not(.gaveta-sombra)').forEach(el => { el.inert = true; });
+    document.documentElement.classList.add('travado');
+    void g.offsetWidth; /* aplica o estado fechado antes de animar a entrada */
+    g.classList.add('aberta'); sombra.classList.add('aberta');
+    setTimeout(() => {
+      const alvo = $('[data-tam]:not([disabled])', g) || $('summary', g) || $('button', g);
+      if (alvo) alvo.focus({ preventScroll: true });
+    }, calmo() ? 0 : 80);
+  }
+  function fecharGaveta(imediato) {
+    const g = $('.gaveta-compra'), sombra = $('.gaveta-sombra'); if (!g || g.hidden) return;
+    g.classList.remove('aberta'); sombra.classList.remove('aberta');
+    $$('#miolo > *, #app > *').forEach(el => { el.inert = false; });
+    document.documentElement.classList.remove('travado');
+    const fim = () => { g.hidden = true; sombra.hidden = true; };
+    clearTimeout(gavetaT);
+    if (imediato || calmo()) fim(); else gavetaT = setTimeout(fim, 460);
+    const volta = gavetaFoco && gavetaFoco !== document.body && gavetaFoco.isConnected ? gavetaFoco : $('[data-vitrine-ir]');
+    if (!imediato && volta) volta.focus({ preventScroll: true });
+    gavetaFoco = null;
+  }
+  function montarVitrine() {
+    const sec = $('#vitrine'); if (!sec || !window.VitrineCor) return;
+    vitrineFx = VitrineCor.montar($('.vitrine-neve', sec));
+    limpezas.push(() => { if (vitrineFx) vitrineFx.desligar(); vitrineFx = null; fecharGaveta(true); });
+  }
+  function pintarVitrine(p, animar) {
+    const sec = $('#vitrine'); if (!sec) return;
+    const s = selDe(p), k = s.cor, [fundo, tinta] = tomVitrine(p, k), vez = ++vitrineVez;
+    const peca = $('#vitrine-peca'), nome = $('.vitrine-nome', sec), onda = $('.vitrine-onda', sec);
+    $$('[data-vitrine-cor]', sec).forEach(b => {
+      const on = b.dataset.vitrineCor === k; b.classList.toggle('ativa', on); b.setAttribute('aria-pressed', on);
+      if (+sec.dataset.modelo !== s.modelo) $('.vitrine-mini', b).innerHTML = fotoHTML(p, b.dataset.vitrineCor, false, s.modelo);
+    });
+    sec.dataset.modelo = s.modelo;
+    $('#vitrine-anuncio').textContent = `Cor ${CORES[k].nome}`;
+    const pintarFundo = () => { sec.style.setProperty('--v-fundo', fundo); };
+    const pintarTinta = () => { sec.style.setProperty('--v-tinta', tinta); sec.dataset.tom = tomDeTinta(tinta); tomDoTopo(); };
+    onda.getAnimations().forEach(a => a.cancel());
+    if (!animar || calmo()) {
+      pintarFundo(); pintarTinta();
+      peca.innerHTML = fotoHTML(p, k, true, s.modelo);
+      nome.innerHTML = nomeEmLetras(CORES[k].nome); nome.style.setProperty('--n', maiorPalavra(CORES[k].nome));
+      return;
+    }
+    /* o estouro sai do peito da peça */
+    const rs = sec.getBoundingClientRect(), rp = peca.getBoundingClientRect();
+    const cx = rp.left - rs.left + rp.width / 2, cy = rp.top - rs.top + rp.height * .42;
+    if (vitrineFx) vitrineFx.explodir({ x: cx, y: cy, largura: rp.width, altura: rp.height, cores: [CORES[k].a, CORES[k].b] });
+
+    /* o fundo novo cresce em círculo a partir da peça */
+    const raio = Math.hypot(Math.max(cx, rs.width - cx), Math.max(cy, rs.height - cy));
+    onda.style.background = fundo;
+    const anim = onda.animate([
+      { clipPath: `circle(0px at ${cx}px ${cy}px)` },
+      { clipPath: `circle(${Math.ceil(raio)}px at ${cx}px ${cy}px)` }
+    ], { duration: 950, delay: 140, easing: 'cubic-bezier(.65,0,.25,1)', fill: 'both' });
+    anim.onfinish = () => { if (vez !== vitrineVez) return; pintarFundo(); anim.cancel(); };
+    setTimeout(() => { if (vez === vitrineVez) pintarTinta(); }, 520);
+
+    /* a peça some na fumaça e volta na cor nova */
+    const velha = $('.arte', peca);
+    if (velha) velha.animate([
+      { opacity: 1, transform: 'none', filter: 'blur(0px)' },
+      { opacity: 0, transform: 'scale(.94)', filter: 'blur(12px)' }
+    ], { duration: 260, easing: 'cubic-bezier(.5,0,.75,0)', fill: 'forwards' });
+    $$('.l', nome).forEach((l, i) => l.animate([{ transform: 'none' }, { transform: 'translateY(-110%)' }], { duration: 280, delay: i * 14, easing: 'cubic-bezier(.5,0,.75,0)', fill: 'forwards' }));
+    setTimeout(() => {
+      if (vez !== vitrineVez) return;
+      peca.innerHTML = fotoHTML(p, k, true, s.modelo);
+      const nova = $('.arte', peca);
+      if (nova) nova.animate([
+        { opacity: 0, transform: 'scale(1.07) translateY(14px)', filter: 'blur(10px)' },
+        { opacity: 1, transform: 'none', filter: 'blur(0px)' }
+      ], { duration: 820, easing: 'cubic-bezier(.16,1,.3,1)' });
+      nome.innerHTML = nomeEmLetras(CORES[k].nome); nome.style.setProperty('--n', maiorPalavra(CORES[k].nome));
+      $$('.l', nome).forEach((l, i) => l.animate([{ transform: 'translateY(110%)' }, { transform: 'none' }], { duration: 680, delay: 60 + i * 32, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards' }));
+    }, 300);
+  }
   function telaProduto(p) {
     if (!ehArara(p)) return telaCena(p.dep, p);
-    const s = selDe(p), [ant, prox] = vizinhos(p), dep = DEPARTAMENTOS[p.dep];
-    return `<section class="pdp pdp-arara" id="pdp" data-id="${p.id}" data-tom="claro" style="--fundo:${dep.cor};--tinta:${dep.tinta};--glow:${LED}">
-      <div class="pdp-grade guia">
-        <div class="pdp-info">
-          <p class="mono"><a href="#${p.dep}">${dep.nome}</a> / ${String(doDep(p.dep).indexOf(p) + 1).padStart(2, '0')}</p>
-          <h1 class="pdp-nome">${p.nome}</h1>
-          <p class="pdp-desc">${p.desc}</p>
-          <div class="pdp-tags">${p.estilos.map(e => `<a class="pilula pilula-tinta" href="#estilo-${e}">${ESTILOS[e].nome}</a>`).join('')}<span class="pilula pilula-tinta pilula-fixa">${p.publico}</span></div>
-        </div>
-        <div class="pdp-palco" id="palco">
-          <div class="arara-cano" aria-hidden="true"></div>
-          <a class="vizinho vizinho-e" href="#p-${ant.id}" data-peca="${ant.id}" aria-label="Peça anterior: ${ant.nome}">${arte(ant, selDe(ant).cor, selDe(ant).modelo)}</a>
-          <div class="pdp-peca" id="pdp-peca">${fotoHTML(p, s.cor, true, s.modelo)}</div>
-          <a class="vizinho vizinho-d" href="#p-${prox.id}" data-peca="${prox.id}" aria-label="Próxima peça: ${prox.nome}">${arte(prox, selDe(prox).cor, selDe(prox).modelo)}</a>
-        </div>
-        ${compraHTML(p)}
-      </div>
-    </section>
-    ${combinaHTML(p)}`;
+    return `${vitrineHTML(p)}${gavetaHTML(p)}${combinaHTML(p)}`;
   }
   function tabelaMedidas(p) {
     if (p.tam === undefined) return '';
@@ -957,6 +1057,7 @@
     if (!sec) return;
     atualizarMostruarioProduto(p);
     const box = $('#pdp-peca');
+    if (!box && p.dep !== 'tenis') { const n = $('#nome-cor'); if (n) n.textContent = c.nome; return; }
     const vez = ++trocaTenisPedido;
     if (p.dep === 'tenis') {
       const nova = document.createElement('template');
@@ -1084,6 +1185,7 @@
   }
   let focoAntes = null;
   function abrirSacola() {
+    fecharGaveta(true);
     const a = $('#sacola'); focoAntes = document.activeElement;
     a.hidden = false; $('#sombra').hidden = false;
     requestAnimationFrame(() => { a.classList.add('aberta'); $('#sombra').classList.add('aberta'); });
@@ -1654,7 +1756,8 @@
             retirarAnteriores();
           });
         });
-        detalheCor.src = `img/tenis-variantes/${p.id}-${cor}-parede.webp?v=9`;
+        const urlParedeCor = `img/tenis-variantes/${p.id}-${cor}-parede.webp?v=11`;
+        detalheCor.src = urlParedeCor;
       } else {
         detalheCor.removeAttribute('src');
         retirarAnteriores();
@@ -1751,7 +1854,7 @@
     }
     const detalhe = $('#tenis-detalhe');
     if (detalhe && p) {
-      const urlDetalhe = `img/tenis-detalhe-limpo/detalhe-${String(p.indiceParede + 1).padStart(2, '0')}.webp?v=9`;
+      const urlDetalhe = `img/tenis-detalhe-limpo/detalhe-${String(p.indiceParede + 1).padStart(2, '0')}.webp?v=11`;
       const urlParede = `img/tenis-detalhe-limpo/parede-${String(p.indiceParede + 1).padStart(2, '0')}.webp?v=9`;
       const cenaT = detalhe.closest('.cena-tenis');
       if (cenaT) { cenaT.dataset.parede = '1'; cenaT.style.setProperty('--tenis-zoom-wall', `url('${new URL(urlParede, document.baseURI).href}')`); }
@@ -1933,7 +2036,7 @@
     document.title = titulo;
     marcarNav(h);
     $$('[data-arara]').forEach(montarArara);
-    montarParedes(); montarPalco(); ligarHero(); iniciarTimerHero(); montarCena(animar);
+    montarParedes(); montarPalco(); montarVitrine(); ligarHero(); iniciarTimerHero(); montarCena(animar);
     revelar(); aoRolar(); Mov.atualizar();
     if (h === 'pedido') confete();
     return h;
@@ -2200,18 +2303,30 @@
       return;
     }
 
+    /* vitrine de cor: troca a cor e mantém o formulário de compra igual */
+    if ((el = c('[data-vitrine-cor]'))) {
+      const p = porId(c('#vitrine').dataset.id), s = selDe(p);
+      if (s.cor === el.dataset.vitrineCor) return;
+      s.cor = el.dataset.vitrineCor;
+      $$('#pdp [data-cor]').forEach(b => { const on = b.dataset.cor === s.cor; b.classList.toggle('ativa', on); b.setAttribute('aria-pressed', on); });
+      pintarVitrine(p, true);
+      pintarProduto(p, false);
+      return;
+    }
+    if (c('[data-vitrine-ir]')) { abrirGaveta(); return; }
+    if (c('[data-gaveta-fechar]')) { fecharGaveta(); return; }
+
     /* produto */
     const pdp = c('#pdp');
     if (pdp) {
       const p = porId(pdp.dataset.id), s = selDe(p);
-      if ((el = c('[data-cor]'))) { s.cor = el.dataset.cor; $$('[data-cor]', pdp).forEach(b => { const on = b.dataset.cor === s.cor; b.classList.toggle('ativa', on); b.setAttribute('aria-pressed', on); }); pintarProduto(p, true); return; }
-      if ((el = c('[data-modelo]'))) { s.modelo = +el.dataset.modelo; $$('[data-modelo]', pdp).forEach(b => { const on = +b.dataset.modelo === s.modelo; b.classList.toggle('ativa', on); b.setAttribute('aria-pressed', on); }); pintarProduto(p, true); return; }
+      if ((el = c('[data-cor]'))) { s.cor = el.dataset.cor; $$('[data-cor]', pdp).forEach(b => { const on = b.dataset.cor === s.cor; b.classList.toggle('ativa', on); b.setAttribute('aria-pressed', on); }); pintarProduto(p, false); pintarVitrine(p, true); return; }
+      if ((el = c('[data-modelo]'))) { s.modelo = +el.dataset.modelo; $$('[data-modelo]', pdp).forEach(b => { const on = +b.dataset.modelo === s.modelo; b.classList.toggle('ativa', on); b.setAttribute('aria-pressed', on); }); pintarProduto(p, false); pintarVitrine(p, true); return; }
       if ((el = c('[data-tam]'))) { s.tam = el.dataset.tam; $$('[data-tam]', pdp).forEach(b => { const on = b.dataset.tam === s.tam; b.classList.toggle('ativa', on); b.setAttribute('aria-pressed', on); }); $('#erro-tam').hidden = true; const mn = $('#tam-menu'); if (mn) { Mov.fechar(mn); $('#tam-txt').textContent = 'Tamanho ' + s.tam; } return; }
 
     }
 
     /* filtros */
-    if (c('[data-abre-filtros]')) { S.filtroAberto = !S.filtroAberto; const pn = $('#painel-filtros'); pn.classList.toggle('aberto', S.filtroAberto); c('[data-abre-filtros]').setAttribute('aria-expanded', S.filtroAberto); return; }
     if ((el = c('[data-filtro]'))) { const g = el.dataset.filtro, v = el.dataset.valor; if (g === 'cor' && S.filtros.cor === v) return; S.filtros[g] = v; repintarLoja(el.dataset.foco); return; }
     if (c('[data-promo]')) { S.filtros.promo = !S.filtros.promo; repintarLoja('promo'); return; }
     if (c('[data-limpar]')) { Object.assign(S.filtros, { dep: '', estilo: '', publico: '', tam: '', cor: '', promo: false, q: '', ordem: 'relevancia' }); repintarLoja(); return; }
@@ -2282,6 +2397,7 @@
     if (!modal || modal.hidden) return;
     modal.classList.remove('visivel'); modal.classList.add('fechando');
     document.documentElement.classList.remove('travado'); document.body.classList.remove('mostruario-aberto');
+    if (gavetaAberta()) document.documentElement.classList.add('travado');
     clearTimeout(modal._fecharTimer);
     const terminar = () => {
       if (!modal.classList.contains('fechando')) return;
@@ -2365,7 +2481,7 @@
         return;
       }
       adicionar(p, s);
-      voarParaSacola($('#pdp-peca .arte'));
+      voarParaSacola($('#pdp-peca .arte') || $('#vitrine-peca .arte'));
       toast(`${p.nome} na sacola.`, 'Ver sacola');
       const bs = $('#adicionar'), tx = $('#adicionar-txt');
       if (bs && tx) { tx.textContent = 'Na sacola'; bs.classList.add('feito'); setTimeout(() => { if (tx.isConnected) { tx.textContent = 'Colocar na sacola'; bs.classList.remove('feito'); } }, 1700); }
@@ -2404,7 +2520,7 @@
     if (t.matches('[data-parc]')) { S.ck.pag.parc = +t.value; }
   });
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { fecharSacola(); fecharBusca(); fecharMostruario($('[data-mostruario]:not([hidden])')); }
+    if (e.key === 'Escape') { const mo = $('[data-mostruario]:not([hidden])'); fecharSacola(); fecharBusca(); if (mo) fecharMostruario(mo); else fecharGaveta(); }
     if (e.key === 'Tab' && !$('#sacola').hidden) {
       const fs = $$('a[href],button:not([disabled]),input,select', $('#sacola')).filter(x => x.offsetParent !== null);
       if (!fs.length) return;
@@ -2413,7 +2529,7 @@
       else if (!e.shiftKey && document.activeElement === ult) { e.preventDefault(); pri.focus(); }
     }
     if ($('#cena') && !$('#pdp') && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName) && $('#sacola').hidden && $('#busca').hidden && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) irTela(e.key === 'ArrowLeft' ? -1 : 1);
-    if ($('#pdp') && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName) && $('#sacola').hidden && $('#busca').hidden) {
+    if ($('#pdp') && !gavetaAberta() && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName) && $('#sacola').hidden && $('#busca').hidden) {
       /* Nos tênis, as setas do teclado não trocam de modelo. */
       const pecaAtual = porId($('#pdp').dataset.id);
       if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !(pecaAtual && pecaAtual.dep === 'tenis')) {
