@@ -724,11 +724,10 @@
   function avaliacoesHTML(p) {
     const dados = lerAvaliacoes(p.id);
     const media = dados.length ? (dados.reduce((s, a) => s + a.estrelas, 0) / dados.length).toFixed(1).replace('.', ',') : '—';
-    const legendasFotos = ['Foto 1', 'Foto 2', 'Foto 3'];
     const lista = dados.length ? dados.map(a => `<article class="avaliacao-item">
       <header class="avaliacao-item-cab"><div><strong>${seguro(a.nome)}</strong><span class="avaliacao-compra">Comprou este produto &middot; ${seguro(a.varianteFoto || 'variante demonstrativa')}</span><time>${seguro(a.data || '')}</time></div>${estrelasHTML(a.estrelas)}</header>
       <p class="avaliacao-texto">${seguro(a.texto)}</p>
-      ${Array.isArray(a.fotosDemo) && a.fotosDemo.length === 3 ? `<div class="avaliacao-fotos" aria-label="Tres fotos demonstrativas do produto">${a.fotosDemo.map((foto, i) => `<figure><div class="avaliacao-foto-corte" role="img" aria-label="Foto ilustrativa ${i + 1}: ${seguro(legendasFotos[i])}" style="--foto:url('/${seguro(foto.src)}');--pos-x:${foto.x}%;--pos-y:${foto.y}%;--foto-size:${foto.size};--foto-ratio:${foto.ratio}"></div><figcaption>${seguro(legendasFotos[i])}</figcaption></figure>`).join('')}</div>` : ''}
+      ${Array.isArray(a.fotosDemo) && a.fotosDemo.length === 3 ? `<div class="avaliacao-fotos" aria-label="Tres fotos demonstrativas do produto">${a.fotosDemo.map((foto, i) => `<figure><div class="avaliacao-foto-corte" role="img" aria-label="Foto demonstrativa do produto" style="--foto:url('/${seguro(foto.src)}');--pos-x:${foto.x}%;--pos-y:${foto.y}%;--foto-size:${foto.size};--foto-ratio:${foto.ratio}"></div></figure>`).join('')}</div>` : ''}
       ${a.fotos?.length ? `<div class="avaliacao-fotos">${a.fotos.filter(src => typeof src === 'string' && src.startsWith('data:image/')).slice(0, 3).map((src, i) => `<figure><img src="${src}" alt="Foto ${i + 1} da ${seguro(p.nome)}" loading="lazy"><figcaption>Foto enviada</figcaption></figure>`).join('')}</div>` : ''}
     </article>`).join('') : '<p class="avaliacao-vazia">Esta peça ainda não tem avaliações. Conte como foi a sua experiência.</p>';
     return `<section class="avaliacoes guia" id="avaliacoes" aria-labelledby="titulo-avaliacoes" data-produto-avaliacoes="${p.id}">
