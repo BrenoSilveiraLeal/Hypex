@@ -573,7 +573,7 @@
       <button type="button" class="cena-seta cena-seta-d" data-tela="1" aria-label="Próxima tela com mais ${d.nome.toLowerCase()}"><span>Mais ${d.nome.toLowerCase()}</span>${icone('dir')}</button>` : ''}
       <div id="cena-painel">${foco ? painelCena(foco) : ''}</div>
     </section>
-    <div id="cena-extra" class="cena-extra">${foco ? combinaHTML(foco) : ''}</div>`;
+    <div id="cena-extra" class="cena-extra">${foco ? combinaHTML(foco) + avaliacoesHTML(foco) : ''}</div>`;
   }
   function painelCena(p) {
     return `<a class="cena-voltar" href="#${p.dep}">${icone('esq')} Voltar à prateleira</a>
@@ -592,8 +592,162 @@
       <div class="grade">${comboPara(p).map(cardHTML).join('')}</div>
     </section>`;
   }
+  const chaveAvaliacoes = id => `hypex-avaliacoes-v3-${id}`;
+  const textosIniciais = {
+    pesada: [
+      { nome: 'Marina S.', estrelas: 5, cor: 'neve', data: '18 de novembro de 2026', texto: 'A malha é encorpada mesmo. Peguei meu tamanho de sempre e gostei de como caiu no ombro.' },
+      { nome: 'Caio R.', estrelas: 4, cor: 'grafite', data: '7 de novembro de 2026', texto: 'O grafite veio igual às fotos e a gola ficou certinha depois da primeira lavagem.' }
+    ],
+    estampa: [{ nome: 'Lara M.', estrelas: 5, cor: 'grafite', data: '16 de novembro de 2026', texto: 'O bordado é discreto, era exatamente o que eu procurava. Usei com jeans e ficou ótimo.' }],
+    listrada: [
+      { nome: 'Joana P.', estrelas: 5, cor: 'neve', data: '20 de novembro de 2026', texto: 'As listras têm uma cor bonita e a camiseta ficou soltinha sem parecer larga demais.' },
+      { nome: 'Renato F.', estrelas: 4, cor: 'cobalto', data: '11 de novembro de 2026', texto: 'Boa para levar na mala, não amassou muito. O azul é bem vivo pessoalmente.' }
+    ],
+    polo: [{ nome: 'Felipe A.', estrelas: 5, cor: 'mata', data: '14 de novembro de 2026', texto: 'O piquet é macio e a gola mantém o formato. Vesti para trabalhar e fiquei confortável o dia todo.' }],
+    camisa: [
+      { nome: 'Bia C.', estrelas: 5, cor: 'areia', data: '21 de novembro de 2026', texto: 'Leve e fresca. A cor areia combina com bastante coisa e o comprimento ficou bom por fora da calça.' },
+      { nome: 'Daniel V.', estrelas: 4, cor: 'neve', data: '12 de novembro de 2026', texto: 'O tecido tem uma textura bonita. Escolhi a manga longa e dobrei o punho para usar no calor.' }
+    ],
+    capuz: [
+      { nome: 'Lucas T.', estrelas: 5, cor: 'grafite', data: '19 de novembro de 2026', texto: 'O bolso é grande e o capuz tem bom caimento. Ficou do jeito mais amplo que eu gosto.' },
+      { nome: 'Nina B.', estrelas: 4, cor: 'vinho', data: '8 de novembro de 2026', texto: 'Quentinho sem pinicar. O vinho ficou bonito e diferente das cores que já tenho.' }
+    ],
+    cargo: [{ nome: 'Igor N.', estrelas: 5, cor: 'mata', data: '17 de novembro de 2026', texto: 'Os bolsos laterais são úteis de verdade e a barra ajusta bem no tênis.' }],
+    alfaiatada: [
+      { nome: 'Helena G.', estrelas: 5, cor: 'grafite', data: '22 de novembro de 2026', texto: 'O vinco deixa a calça arrumada sem ficar formal demais. Usei com camiseta e funcionou.' },
+      { nome: 'Tainá L.', estrelas: 4, cor: 'areia', data: '10 de novembro de 2026', texto: 'Gostei da cintura alta e da perna ampla. Para mim, ficou um pouco comprida com sapato baixo.' }
+    ],
+    jeansreta: [
+      { nome: 'Rafa C.', estrelas: 5, cor: 'jeans', data: '20 de novembro de 2026', texto: 'Jeans firme e confortável depois de algumas horas. O corte reto ficou como eu esperava.' },
+      { nome: 'Marcos D.', estrelas: 4, cor: 'escuro', data: '5 de novembro de 2026', texto: 'Gostei do pesponto e dos bolsos. Peguei a numeração habitual e serviu bem.' }
+    ],
+    jogger: [{ nome: 'Pri S.', estrelas: 5, cor: 'grafite', data: '15 de novembro de 2026', texto: 'O punho não aperta e o cordão ajuda a ajustar. Boa para caminhar e ficar em casa.' }],
+    shorts: [
+      { nome: 'André B.', estrelas: 5, cor: 'areia', data: '19 de novembro de 2026', texto: 'O linho tem um toque gostoso e as pregas deixam o visual mais arrumado. Usei num almoço de domingo.' },
+      { nome: 'Cris F.', estrelas: 4, cor: 'mata', data: '6 de novembro de 2026', texto: 'Veste confortável e tem bolsos bons. A cor verde é mais fechada do que eu imaginava.' }
+    ],
+    saia: [{ nome: 'Luiza R.', estrelas: 5, cor: 'vinho', data: '13 de novembro de 2026', texto: 'O plissado se mexe bonito quando anda e o cós não ficou apertado. Chegou bem embalada.' }],
+    vestido: [
+      { nome: 'Malu E.', estrelas: 5, cor: 'neve', data: '21 de novembro de 2026', texto: 'A estampa é delicada e o tecido é fresco. Usei num passeio de tarde e não precisei ajustar nada.' },
+      { nome: 'Aline K.', estrelas: 4, cor: 'turquesa', data: '9 de novembro de 2026', texto: 'A cor ficou linda no sol. O forro ajuda bastante e as alças são confortáveis.' }
+    ]
+  };
+  const textosPorDep = {
+    tenis: [
+      'Usei o {produto} no caminho do trabalho e meus pés ficaram confortáveis até a volta.',
+      'O encaixe ficou bom no meu pé e gostei do solado para caminhar pela cidade.',
+      'Chegou bem embalado e sem marcas. O formato ficou como eu esperava.',
+      'O material parece firme e o tênis é mais leve do que imaginei.',
+      'Estreei num passeio longo e não precisei parar para descansar os pés.',
+      'Gostei do acabamento e do espaço na frente. Calcei a numeração de sempre.',
+      'O {produto} combina com várias roupas e ficou confortável desde o primeiro uso.',
+      'A foto ajudou a escolher e o produto recebido correspondeu ao que eu esperava.'
+    ],
+    meias: [
+      'O tecido é macio e não ficou escorregando dentro do sapato.',
+      'Usei o dia todo e o elástico não apertou minha perna.',
+      'O acabamento dos dedos é confortável, sem costura incomodando.',
+      'Chegaram bem dobradas e a cor é bonita. Já lavei uma vez e continuam iguais.',
+      'A meia fica no lugar e o material parece bem feito para o preço.',
+      'Gostei da altura no tornozelo e do toque do tecido no pé.',
+      'Comprei para usar no trabalho e achei confortável até o fim do expediente.',
+      'A peça veste como esperado e não fica grossa dentro do tênis.'
+    ],
+    intima: [
+      'O tecido é agradável e o acabamento não ficou marcando sob a roupa.',
+      'Veste com conforto e as costuras não incomodaram durante o dia.',
+      'Gostei do toque macio e do ajuste. O tamanho escolhido ficou certo para mim.',
+      'Chegou bem embalado e a peça corresponde ao que aparece na página.',
+      'Usei por algumas horas e achei confortável, sem apertar ou enrolar.',
+      'O elástico é suave e o tecido tem um toque bom na pele.',
+      'A modelagem ficou confortável e o acabamento parece bem caprichado.',
+      'Boa peça para o dia a dia. Depois de lavar, manteve o formato.'
+    ],
+    casacos: [
+      'A peça veste bem por cima de uma camiseta e o tecido tem um toque gostoso.',
+      'Usei numa noite fria e fiquei aquecido sem sentir o casaco pesado.',
+      'Gostei dos bolsos e do caimento nos ombros. Chegou sem amassados.',
+      'O acabamento é bonito e o tamanho ficou como eu esperava.',
+      'A cor pessoalmente é bonita e combina fácil com jeans.',
+      'O {produto} foi uma boa compra. Usei bastante nesta semana.',
+      'O tecido parece resistente e o zíper corre sem prender.',
+      'Veste confortável e não limita os movimentos. Gostei do caimento.'
+    ],
+    roupas: [
+      'A peça tem um caimento bonito e ficou confortável para usar por várias horas.',
+      'Gostei do acabamento e do toque do tecido. O tamanho ficou bom em mim.',
+      'Chegou bem embalada e serviu como eu esperava. Já usei duas vezes.',
+      'A foto mostra bem a peça. Ao vivo, o tecido e o corte também me agradaram.',
+      'Usei num passeio e me senti confortável. O caimento ficou bem natural.',
+      'A peça veste bem e combina com outras coisas que já tenho no armário.',
+      'Gostei dos detalhes e da sensação do tecido. Compraria novamente.',
+      'Ficou confortável desde a primeira vez que usei. A entrega também foi rápida.'
+    ]
+  };
+  const nomesDemo = ['Marina S.', 'Caio R.', 'Lara M.', 'Joana P.', 'Renato F.', 'Felipe A.', 'Bia C.', 'Daniel V.', 'Lucas T.', 'Nina B.', 'Igor N.', 'Helena G.', 'Tainá L.', 'Rafa C.', 'Marcos D.', 'Pri S.', 'André B.', 'Cris F.', 'Luiza R.', 'Malu E.', 'Aline K.', 'Bruno T.', 'Sofia R.', 'Mateus P.', 'Júlia V.', 'Pedro M.'];
+  const datasDemo = ['22 de novembro de 2026', '17 de novembro de 2026', '12 de novembro de 2026', '6 de novembro de 2026', '28 de outubro de 2026', '21 de outubro de 2026', '14 de outubro de 2026', '8 de outubro de 2026'];
+  const coresFotosDemo = {
+    pesada: ['neve', 'grafite'], estampa: ['grafite', 'neve'], listrada: ['neve', 'arara'], polo: ['mata', 'vinho'], camisa: ['areia', 'neve'], regata: ['neve', 'grafite'], capuz: ['grafite', 'neve'], cargo: ['mata', 'areia'], alfaiatada: ['grafite', 'areia'], jeansreta: ['jeans', 'escuro'], jogger: ['grafite', 'cobalto'], shorts: ['areia', 'grafite'], saia: ['vinho', 'areia'], vestido: ['neve', 'turquesa'], vestidoliso: ['grafite', 'vinho'],
+    cometa: ['areia', 'tangerina'], quadra: ['neve', 'mata'], bolha: ['cobalto', 'grafite'], atelie: ['lavanda', 'areia'], trilha: ['grafite', 'mata'], retro: ['areia', 'vinho'], pilar: ['grafite', 'neve'], lua: ['neve', 'areia'], couro: ['neve', 'grafite'], onda: ['chiclete', 'grafite'],
+    alto: ['neve', 'grafite'], soquete: ['areia', 'grafite'], corrida: ['grafite', 'tangerina'], bolinha: ['neve', 'lavanda'], social: ['vinho', 'grafite'], felpuda: ['areia', 'neve'],
+    boxer: ['grafite', 'cobalto'], boxerlistra: ['neve', 'cobalto'], calcinha: ['areia', 'vinho'], sutia: ['areia', 'grafite'], topesporte: ['grafite', 'violeta'], regatainterna: ['neve', 'grafite'],
+    aurora: ['prata', 'cobalto'], puffer: ['grafite', 'vinho'], cortavento: ['mata', 'tangerina'], jaquetajeans: ['jeans', 'escuro'], trench: ['areia', 'grafite'], capuzzip: ['mata', 'grafite'], blazer: ['vinho', 'grafite'], fleece: ['areia', 'mata']
+  };
+  const aspectosFotosDemo = { pesada: .688, camisa: .659, capuzzip: .628, jeansreta: .645, polo: .609, puffer: .659, regata: .658, shorts: .611, vestidoliso: .609 };
+  const avaliacoesIniciais = Object.fromEntries(PRODUTOS.map((p, i) => {
+    const personalizadas = textosIniciais[p.id] || [];
+    const pool = textosPorDep[p.dep] || textosPorDep.roupas;
+    const comentarios = [0, 1].map(j => {
+      const pronto = personalizadas[j] || {};
+      return {
+        nome: pronto.nome || nomesDemo[(i * 2 + j * 7) % nomesDemo.length],
+        estrelas: pronto.estrelas || (j === 1 && i % 3 === 0 ? 4 : 5),
+        data: pronto.data || datasDemo[(i * 2 + j * 3) % datasDemo.length],
+        texto: pronto.texto || pool[(i * 3 + j * 5) % pool.length].replace('{produto}', p.nome.toLowerCase()),
+        varianteFoto: CORES[coresFotosDemo[p.id]?.[j] || p.cores[j] || p.cores[0]]?.nome || '',
+        fotosDemo: [0, 1, 2].map(n => ({ src: `img/avaliacoes/${p.id}.jpg`, x: n * 50, y: j * 100, size: '300% 200%', ratio: aspectosFotosDemo[p.id] || 1 }))
+      };
+    });
+    return [p.id, comentarios];
+  }));
+  function lerAvaliacoes(id) {
+    try {
+      const guardados = localStorage.getItem(chaveAvaliacoes(id));
+      if (guardados === null) return avaliacoesIniciais[id] || [];
+      const dados = JSON.parse(guardados);
+      return Array.isArray(dados) ? dados.filter(a => a && Number.isInteger(a.estrelas) && a.estrelas >= 1 && a.estrelas <= 5) : (avaliacoesIniciais[id] || []);
+    } catch (e) { return avaliacoesIniciais[id] || []; }
+  }
+  function estrelasHTML(n) {
+    return `<span class="avaliacao-estrelas" aria-label="${n} de 5 estrelas">${'★'.repeat(n)}${'☆'.repeat(5 - n)}</span>`;
+  }
+  function avaliacoesHTML(p) {
+    const dados = lerAvaliacoes(p.id);
+    const media = dados.length ? (dados.reduce((s, a) => s + a.estrelas, 0) / dados.length).toFixed(1).replace('.', ',') : '—';
+    const legendasFotos = ['Foto 1', 'Foto 2', 'Foto 3'];
+    const lista = dados.length ? dados.map(a => `<article class="avaliacao-item">
+      <header class="avaliacao-item-cab"><div><strong>${seguro(a.nome)}</strong><span class="avaliacao-compra">Comprou este produto &middot; ${seguro(a.varianteFoto || 'variante demonstrativa')}</span><time>${seguro(a.data || '')}</time></div>${estrelasHTML(a.estrelas)}</header>
+      <p class="avaliacao-texto">${seguro(a.texto)}</p>
+      ${Array.isArray(a.fotosDemo) && a.fotosDemo.length === 3 ? `<div class="avaliacao-fotos" aria-label="Tres fotos demonstrativas do produto">${a.fotosDemo.map((foto, i) => `<figure><div class="avaliacao-foto-corte" role="img" aria-label="Foto ilustrativa ${i + 1}: ${seguro(legendasFotos[i])}" style="--foto:url('/${seguro(foto.src)}');--pos-x:${foto.x}%;--pos-y:${foto.y}%;--foto-size:${foto.size};--foto-ratio:${foto.ratio}"></div><figcaption>${seguro(legendasFotos[i])}</figcaption></figure>`).join('')}</div>` : ''}
+      ${a.fotos?.length ? `<div class="avaliacao-fotos">${a.fotos.filter(src => typeof src === 'string' && src.startsWith('data:image/')).slice(0, 3).map((src, i) => `<figure><img src="${src}" alt="Foto ${i + 1} da ${seguro(p.nome)}" loading="lazy"><figcaption>Foto enviada</figcaption></figure>`).join('')}</div>` : ''}
+    </article>`).join('') : '<p class="avaliacao-vazia">Esta peça ainda não tem avaliações. Conte como foi a sua experiência.</p>';
+    return `<section class="avaliacoes guia" id="avaliacoes" aria-labelledby="titulo-avaliacoes" data-produto-avaliacoes="${p.id}">
+      <nav class="produto-abas" aria-label="Conteúdo do produto"><a href="${ehArara(p) ? '#vitrine' : '#pdp'}">Produto</a><a class="ativa" href="#avaliacoes" aria-current="location">Avaliações <span data-total-avaliacoes>${dados.length}</span></a></nav>
+      <div class="avaliacoes-grade"><aside class="avaliacoes-resumo"><p class="avaliacoes-kicker">OPINIÕES DE QUEM COMPROU</p><h2 class="titulo" id="titulo-avaliacoes">Avaliações</h2><div class="avaliacao-media"><strong>${media}</strong><span>${estrelasHTML(dados.length ? Math.round(Number(media.replace(',', '.'))) : 0)}<small>${dados.length} ${dados.length === 1 ? 'avaliação' : 'avaliações'}</small></span></div><button class="botao" type="button" data-escrever-avaliacao>Escrever avaliação</button><p class="avaliacoes-demo">Avaliações e fotos ilustrativas para demonstração.</p></aside>
+        <div class="avaliacoes-lista" data-lista-avaliacoes>${lista}</div></div>
+      <form class="avaliacao-form" data-form-avaliacao hidden>
+        <h3>Conte sobre a peça</h3>
+        <label>Seu nome<input name="nome" autocomplete="name" maxlength="60" required></label>
+        <fieldset class="avaliacao-nota"><legend>Sua nota</legend><div>${[1,2,3,4,5].map(n => `<label><input type="radio" name="estrelas" value="${n}" required><span aria-hidden="true">★</span><span class="sr">${n} ${n === 1 ? 'estrela' : 'estrelas'}</span></label>`).join('')}</div></fieldset>
+        <label>Seu comentário<textarea name="texto" maxlength="600" rows="4" required></textarea></label>
+        <label>Fotos da peça <span class="legenda-dica">Até 3 imagens</span><input type="file" name="fotos" accept="image/*" multiple><small>Fotos do pacote, da peça aberta ou usando a roupa.</small></label>
+        <p class="avaliacao-erro" data-avaliacao-erro role="alert" hidden></p>
+        <div class="avaliacao-acoes"><button class="botao" type="submit">Publicar avaliação</button><button class="link-parede" type="button" data-cancelar-avaliacao>Cancelar</button></div>
+      </form>
+    </section>`;
+  }
   function compraHTML(p, cena) {
-    const s = selDe(p), c = CORES[s.cor];
+    const s = selDe(p), c = CORES[s.cor], mVariante = metricasVariante(p, s.cor);
     const dicaTam = p.dep === 'tenis' ? 'Numeração brasileira' : p.tam.length === 1 ? 'Tamanho único' : 'Guia em Medidas';
     const tamanhos = `<div class="opcoes tamanhos">${p.tam.map(t => { const fora = p.esgotados.includes(t); return `<button type="button" class="opcao${t === s.tam ? ' ativa' : ''}${fora ? ' esgotado' : ''}" data-tam="${t}" aria-pressed="${t === s.tam}" ${fora ? `disabled aria-label="${t}, esgotado"` : ''}>${t}</button>`; }).join('')}</div>`;
     const blocoTam = cena && p.tam.length > 1
@@ -605,6 +759,7 @@
         <p class="compra-preco">${preco(p)}</p>
       </div>
       <p class="compra-parcela" style="--i:1">${parcelaTxt(p.preco)} · 5% off no Pix</p>
+      <div class="compra-metricas" data-compra-metricas aria-label="Dados ilustrativos de vendas e estoque da cor selecionada"><span><b data-compra-vendidos>${mVariante.vendidos}</b> já compraram</span><span><b data-compra-estoque>${mVariante.estoque}</b> em estoque</span><small>Dados ilustrativos</small></div>
       <fieldset style="--i:2"><legend>Cor</legend>
         <div class="bolinhas">${p.cores.map(k => `<button type="button" class="bolinha grande${k === s.cor ? ' ativa' : ''}" style="--c:${CORES[k].a}" data-cor="${k}" aria-label="${CORES[k].nome}" aria-pressed="${k === s.cor}"></button>`).join('')}</div>
       </fieldset>
@@ -875,6 +1030,26 @@
   const tomDeTinta = tinta => Arte.lum(tinta) > .5 ? 'escuro' : 'claro';
   const maiorPalavra = t => Math.max(...t.split(' ').map(w => w.length));
   const nomeEmLetras = t => t.split(' ').map(w => `<span class="p">${[...w].map(l => `<span class="l">${seguro(l)}</span>`).join('')}</span>`).join(' ');
+  function metricasVariante(p, cor) {
+    const codigo = [...`${p.id}:${cor}`].reduce((s, ch) => (s * 31 + ch.charCodeAt(0)) >>> 0, 7);
+    return { estoque: 4 + (codigo % 28), vendidos: 35 + ((codigo * 17) % 1240) };
+  }
+  function atualizarMetricasCompra(p, cor) {
+    const box = $('#pdp [data-compra-metricas]'); if (!box) return;
+    const m = metricasVariante(p, cor);
+    $('[data-compra-vendidos]', box).textContent = String(m.vendidos);
+    $('[data-compra-estoque]', box).textContent = String(m.estoque);
+  }
+  function atualizarMetricasVariante(p, cor) {
+    const m = metricasVariante(p, cor), dados = lerAvaliacoes(p.id);
+    const nota = dados.length ? (dados.reduce((s, a) => s + a.estrelas, 0) / dados.length).toFixed(1).replace('.', ',') : '—';
+    const no = $('#vitrine-nota'), estrelas = $('#vitrine-estrelas'), contagem = $('#vitrine-total-avaliacoes'), vendas = $('#vitrine-vendidos'), estoque = $('#vitrine-estoque');
+    if (no) no.textContent = nota;
+    if (estrelas) { const nivel = dados.length ? Math.round(Number(nota.replace(',', '.'))) : 0; estrelas.textContent = '★'.repeat(nivel) + '☆'.repeat(5 - nivel); estrelas.classList.toggle('sem-nota', !dados.length); }
+    if (contagem) contagem.textContent = `${dados.length} ${dados.length === 1 ? 'avaliação' : 'avaliações'}`;
+    if (vendas) vendas.textContent = String(m.vendidos);
+    if (estoque) estoque.textContent = String(m.estoque);
+  }
   function vitrineHTML(p) {
     const s = selDe(p), [fundo, tinta] = tomVitrine(p, s.cor), dep = DEPARTAMENTOS[p.dep], [ant, prox] = vizinhos(p);
     const ordem = String(doDep(p.dep).indexOf(p) + 1).padStart(2, '0');
@@ -889,6 +1064,7 @@
         <p class="sr" id="vitrine-anuncio" aria-live="polite">Cor ${CORES[s.cor].nome}</p>
         <p class="vitrine-desc">${seguro(p.desc)}</p>
         <p class="vitrine-preco">${preco(p)} <small>${parcelaTxt(p.preco)}</small></p>
+        <div class="vitrine-prova" aria-label="Avaliações, vendas e estoque da cor ${seguro(CORES[s.cor].nome)}"><span><b id="vitrine-nota">—</b> / 5 <i id="vitrine-estrelas" aria-hidden="true">☆☆☆☆☆</i> · <span id="vitrine-total-avaliacoes">0 avaliações</span></span><span><b id="vitrine-vendidos">0</b> vendidos</span><span><b id="vitrine-estoque">0</b> em estoque</span><small>Dados ilustrativos</small></div>
         <button type="button" class="botao vitrine-botao" data-vitrine-ir aria-haspopup="dialog" aria-controls="pdp">Escolher tamanho ${icone('dir')}</button>
       </div>
       <div class="vitrine-peca" id="vitrine-peca">${fotoHTML(p, s.cor, true, s.modelo)}</div>
@@ -948,12 +1124,14 @@
   }
   function montarVitrine() {
     const sec = $('#vitrine'); if (!sec || !window.VitrineCor) return;
+    const p = porId(sec.dataset.id); if (p) atualizarMetricasVariante(p, selDe(p).cor);
     vitrineFx = VitrineCor.montar($('.vitrine-neve', sec));
     limpezas.push(() => { if (vitrineFx) vitrineFx.desligar(); vitrineFx = null; fecharGaveta(true); });
   }
   function pintarVitrine(p, animar) {
     const sec = $('#vitrine'); if (!sec) return;
     const s = selDe(p), k = s.cor, [fundo, tinta] = tomVitrine(p, k), vez = ++vitrineVez;
+    atualizarMetricasVariante(p, k);
     const peca = $('#vitrine-peca'), nome = $('.vitrine-nome', sec), onda = $('.vitrine-onda', sec);
     $$('[data-vitrine-cor]', sec).forEach(b => {
       const on = b.dataset.vitrineCor === k; b.classList.toggle('ativa', on); b.setAttribute('aria-pressed', on);
@@ -1006,7 +1184,7 @@
   }
   function telaProduto(p) {
     if (!ehArara(p)) return telaCena(p.dep, p);
-    return `${vitrineHTML(p)}${gavetaHTML(p)}${combinaHTML(p)}`;
+    return `${vitrineHTML(p)}${gavetaHTML(p)}${combinaHTML(p)}${avaliacoesHTML(p)}`;
   }
   function tabelaMedidas(p) {
     if (p.tam === undefined) return '';
@@ -1055,6 +1233,7 @@
   function pintarProduto(p, comAnim) {
     const s = selDe(p), c = CORES[s.cor], sec = $('#pdp');
     if (!sec) return;
+    atualizarMetricasCompra(p, s.cor);
     atualizarMostruarioProduto(p);
     const box = $('#pdp-peca');
     if (!box && p.dep !== 'tenis') { const n = $('#nome-cor'); if (n) n.textContent = c.nome; return; }
@@ -2261,6 +2440,16 @@
     if (e.defaultPrevented) return;
     const t = e.target, c = s => t.closest(s);
     let el;
+    if ((el = c('[data-escrever-avaliacao]'))) {
+      const form = el.closest('.avaliacoes')?.querySelector('[data-form-avaliacao]');
+      if (form) { form.hidden = false; form.querySelector('[name="nome"]').focus(); }
+      return;
+    }
+    if ((el = c('[data-cancelar-avaliacao]'))) {
+      const form = el.closest('[data-form-avaliacao]');
+      if (form) { form.reset(); form.hidden = true; }
+      return;
+    }
     if ((el = c('[data-look-modelo-abrir]'))) {
       const modal = el.closest('.looks').querySelector('[data-mostruario]');
       abrirMostruario(modal, el); return;
@@ -2472,6 +2661,31 @@
     const f = e.target;
     if (f.matches('[data-form-cupom]')) { tentarCupom(f.cupom.value); return; }
     if (f.id === 'form-busca') { aplicarBusca(); return; }
+    if (f.matches('[data-form-avaliacao]')) {
+      const sec = f.closest('[data-produto-avaliacoes]'), id = sec?.dataset.produtoAvaliacoes;
+      const erro = $('[data-avaliacao-erro]', f), arquivos = [...(f.elements.fotos.files || [])];
+      const avisar = msg => { erro.textContent = msg; erro.hidden = false; };
+      erro.hidden = true;
+      if (arquivos.length > 3) { avisar('Escolha no máximo 3 fotos.'); return; }
+      if (arquivos.some(a => !a.type.startsWith('image/'))) { avisar('Envie somente arquivos de imagem.'); return; }
+      if (arquivos.reduce((s, a) => s + a.size, 0) > 700 * 1024) { avisar('As fotos juntas precisam ter até 700 KB.'); return; }
+      const lerFoto = arquivo => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('Não foi possível ler uma das fotos.'));
+        reader.readAsDataURL(arquivo);
+      });
+      Promise.all(arquivos.map(lerFoto)).then(fotos => {
+        const dados = lerAvaliacoes(id);
+        dados.push({ nome: f.elements.nome.value.trim(), estrelas: Number(f.elements.estrelas.value), texto: f.elements.texto.value.trim(), fotos, data: new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium' }).format(new Date()) });
+        localStorage.setItem(chaveAvaliacoes(id), JSON.stringify(dados));
+        const p = porId(id); if (p) atualizarMetricasVariante(p, selDe(p).cor);
+        const nova = document.createElement('template');
+        nova.innerHTML = avaliacoesHTML(p);
+        sec.replaceWith(nova.content.firstElementChild);
+      }).catch(() => avisar('Não foi possível salvar esta avaliação neste navegador. Tente reduzir o tamanho das fotos.'));
+      return;
+    }
     if (f.id === 'compra') {
       const pdp = $('#pdp'), p = porId(pdp.dataset.id), s = selDe(p);
       if (!s.tam) {
