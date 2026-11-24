@@ -595,7 +595,7 @@
   const chaveAvaliacoes = id => `hypex-avaliacoes-v3-${id}`;
   const textosIniciais = {
     pesada: [
-      { nome: 'Marina S.', estrelas: 5, cor: 'neve', data: '18 de novembro de 2026', texto: 'A malha é encorpada mesmo. Peguei meu tamanho de sempre e gostei de como caiu no ombro.' },
+      { nome: 'Cliente', estrelas: 5, cor: 'neve', data: '18 de novembro de 2026', texto: 'A malha é encorpada mesmo. Peguei meu tamanho de sempre e gostei de como caiu no ombro.' },
       { nome: 'Caio R.', estrelas: 4, cor: 'grafite', data: '7 de novembro de 2026', texto: 'O grafite veio igual às fotos e a gola ficou certinha depois da primeira lavagem.' }
     ],
     estampa: [{ nome: 'Lara M.', estrelas: 5, cor: 'grafite', data: '16 de novembro de 2026', texto: 'O bordado é discreto, era exatamente o que eu procurava. Usei com jeans e ficou ótimo.' }],
@@ -612,6 +612,7 @@
       { nome: 'Lucas T.', estrelas: 5, cor: 'grafite', data: '19 de novembro de 2026', texto: 'O bolso é grande e o capuz tem bom caimento. Ficou do jeito mais amplo que eu gosto.' },
       { nome: 'Nina B.', estrelas: 4, cor: 'vinho', data: '8 de novembro de 2026', texto: 'Quentinho sem pinicar. O vinho ficou bonito e diferente das cores que já tenho.' }
     ],
+    cometa: [{ nome: 'Cliente', estrelas: 5, cor: 'areia', data: '13 de novembro de 2026', texto: 'Usei o Cometa no caminho do trabalho e meus pés ficaram confortáveis até a volta.' }],
     cargo: [{ nome: 'Igor N.', estrelas: 5, cor: 'mata', data: '17 de novembro de 2026', texto: 'Os bolsos laterais são úteis de verdade e a barra ajusta bem no tênis.' }],
     alfaiatada: [
       { nome: 'Helena G.', estrelas: 5, cor: 'grafite', data: '22 de novembro de 2026', texto: 'O vinco deixa a calça arrumada sem ficar formal demais. Usei com camiseta e funcionou.' },
@@ -736,7 +737,7 @@
         <div class="avaliacoes-lista" data-lista-avaliacoes>${lista}</div></div>
       <form class="avaliacao-form" data-form-avaliacao hidden>
         <h3>Conte sobre a peça</h3>
-        <label>Seu nome<input name="nome" autocomplete="name" maxlength="60" required></label>
+        <label>Seu nome<input name="nome" autocomplete="name" maxlength="60" value="${seguro(perfilDemo.nome)}" readonly required></label>
         <fieldset class="avaliacao-nota"><legend>Sua nota</legend><div>${[1,2,3,4,5].map(n => `<label><input type="radio" name="estrelas" value="${n}" required><span aria-hidden="true">★</span><span class="sr">${n} ${n === 1 ? 'estrela' : 'estrelas'}</span></label>`).join('')}</div></fieldset>
         <label>Seu comentário<textarea name="texto" maxlength="600" rows="4" required></textarea></label>
         <label>Fotos da peça <span class="legenda-dica">Até 3 imagens</span><input type="file" name="fotos" accept="image/*" multiple><small>Fotos do pacote, da peça aberta ou usando a roupa.</small></label>
@@ -1660,21 +1661,32 @@
     nome: 'Cliente', email: 'cliente@hypex.demo', telefone: '(11) 98888-1234',
     enderecos: [{ id: 1, apelido: 'Casa', rua: 'Rua das Flores', numero: '100', complemento: 'Apto 12', bairro: 'Centro', cidade: 'Sao Paulo', uf: 'SP', cep: '01000-000' }],
     favoritos: ['cometa', 'polo', 'saia', 'aurora'],
+    avaliacoes: [
+      { produtoId: 'pesada', estrelas: 5, data: '18 de novembro de 2026', texto: 'A malha é encorpada mesmo. Peguei meu tamanho de sempre e gostei de como caiu no ombro.' },
+      { produtoId: 'cometa', estrelas: 5, data: '13 de novembro de 2026', texto: 'Usei o Cometa no caminho do trabalho e meus pés ficaram confortáveis até a volta.' }
+    ],
     pedidos: [
       { id: 'HYP-20489', data: '20 nov 2026', estado: 'Em transito', previsao: '27 a 29 nov 2026', itens: [{ id: 'pesada', qtd: 1, cor: 'neve', tam: 'M' }], devolucao: '' },
       { id: 'HYP-19826', data: '08 nov 2026', estado: 'Entregue', previsao: 'Entregue em 13 nov 2026', itens: [{ id: 'cometa', qtd: 1, cor: 'areia', tam: '40' }, { id: 'alto', qtd: 2, cor: 'grafite', tam: '39-44' }], devolucao: '' }
     ]
   };
-  let perfilDemo = ler('perfilDemo', contaDemo);
-  if (['Sofia Martins', 'Marina Costa'].includes(perfilDemo.nome)) { perfilDemo.nome = contaDemo.nome; perfilDemo.email = contaDemo.email; guardar('perfilDemo', perfilDemo); }
-  let contaLogada = ler('contaLogada', false);
+  let perfilDemo = { ...contaDemo, ...ler('perfilDemo', {}) };
+  perfilDemo.nome = contaDemo.nome;
+  perfilDemo.email = contaDemo.email;
+  let contaLogada = true;
+  guardar('perfilDemo', perfilDemo);
+  guardar('contaLogada', true);
   function telaConta() {
+    contaLogada = true;
     if (!contaLogada) return `<section class="conta-pagina guia"><p class="mono">SUA CONTA HYPEX</p><h1 class="titulo">Entre para acompanhar seus pedidos.</h1><p>Esta demonstracao salva as alteracoes neste navegador. Nenhuma compra ou pagamento real acontece.</p><div class="conta-login"><div><h2>Conta demonstrativa</h2><p>Cliente<br>${seguro(contaDemo.email)}</p><button class="botao" type="button" data-login-demo>Entrar como Cliente</button></div><div><h2>Ou criar perfil local</h2><label>Seu nome<input data-novo-nome autocomplete="name" placeholder="Como podemos te chamar?"></label><label>Seu e-mail<input data-novo-email type="email" autocomplete="email" placeholder="voce@email.com"></label><button class="botao botao-secundario" type="button" data-criar-perfil>Criar conta demonstrativa</button></div></div><a class="link" href="#inicio">Continuar vendo a loja</a></section>`;
     const pedidos = perfilDemo.pedidos || [];
-    return `<section class="conta-pagina guia"><header class="conta-cab"><div><p class="mono">AREA DA CONTA &middot; DEMONSTRACAO</p><h1 class="titulo">Ola, ${seguro(perfilDemo.nome.split(' ')[0])}.</h1><p>${seguro(perfilDemo.email)} &middot; <span>Dados locais de demonstracao</span></p></div><button class="link-parede" type="button" data-sair-demo>Sair da conta</button></header>
-      <nav class="conta-abas"><a href="#conta">Visao geral</a><a href="#conta-pedidos">Pedidos (${pedidos.length})</a><a href="#conta-favoritos">Favoritos (${(perfilDemo.favoritos||[]).length})</a><a href="#conta-enderecos">Enderecos (${(perfilDemo.enderecos||[]).length})</a></nav>
-      <section class="conta-bloco"><h2>Proximas entregas</h2>${pedidos.map(o=>`<article class="conta-pedido"><div><strong>Pedido ${seguro(o.id)}</strong><span>${seguro(o.estado)} - ${seguro(o.previsao)}</span><small>${o.itens.map(i=>seguro(porId(i.id)?.nome||i.id)).join(', ')}</small></div>${o.estado==='Entregue'&&!o.devolucao?`<button class="botao botao-secundario" data-devolucao="${seguro(o.id)}">Solicitar devolucao</button>`:o.devolucao?`<span class="conta-status">${seguro(o.devolucao)}</span>`:''}</article>`).join('')}</section>
-      <div class="conta-duas"><section class="conta-bloco"><h2>Seus favoritos</h2><div class="conta-favs">${(perfilDemo.favoritos||[]).map(id=>{const p=porId(id);return p?`<a href="#p-${p.id}"><img src="${p.fotoLeve}" alt=""><span>${seguro(p.nome)}</span></a>`:''}).join('')}</div></section><section class="conta-bloco"><h2>Endereco de entrega</h2>${(perfilDemo.enderecos||[]).map(e=>`<p><strong>${seguro(e.apelido)}</strong><br>${seguro(e.rua)}, ${seguro(e.numero)} - ${seguro(e.bairro)}<br>${seguro(e.cidade)} - ${seguro(e.uf)}, ${seguro(e.cep)}</p>`).join('')}<button type="button" class="link" data-editar-endereco>Adicionar endereco</button><div data-form-endereco hidden><input data-endereco-novo placeholder="Rua, numero, bairro, cidade e CEP"><button type="button" class="botao" data-salvar-endereco>Salvar endereco</button></div></section></div>
+    const avaliacoesCliente = perfilDemo.avaliacoes || contaDemo.avaliacoes;
+    return `<section class="conta-pagina guia"><header class="conta-cab"><div><p class="mono">AREA DA CONTA &middot; DEMONSTRACAO</p><h1 class="titulo">Olá, ${seguro(perfilDemo.nome.split(' ')[0])}.</h1><p>${seguro(perfilDemo.email)} &middot; <span>Dados locais de demonstracao</span></p></div><a class="link-parede" href="#loja">Continuar comprando</a></header>
+      <nav class="conta-abas"><a href="#conta">Visão geral</a><a href="#conta-pedidos">Pedidos (${pedidos.length})</a><a href="#conta-avaliacoes">Avaliações (${avaliacoesCliente.length})</a><a href="#conta-favoritos">Favoritos (${(perfilDemo.favoritos||[]).length})</a><a href="#conta-enderecos">Endereços (${(perfilDemo.enderecos||[]).length})</a></nav>
+      <div class="conta-resumo"><a href="#conta-pedidos"><strong>${pedidos.length}</strong><span>pedidos</span></a><a href="#conta-avaliacoes"><strong>${avaliacoesCliente.length}</strong><span>avaliações</span></a><a href="#conta-favoritos"><strong>${(perfilDemo.favoritos||[]).length}</strong><span>favoritos</span></a><a href="#conta-enderecos"><strong>${(perfilDemo.enderecos||[]).length}</strong><span>endereços salvos</span></a></div>
+      <section class="conta-bloco" id="conta-pedidos"><header class="conta-secao-cab"><div><p class="mono">ACOMPANHAMENTO</p><h2>Seus pedidos</h2></div></header>${pedidos.map(o=>`<article class="conta-pedido"><div><strong>Pedido ${seguro(o.id)}</strong><span>${seguro(o.estado)} - ${seguro(o.previsao)}</span><small>${o.itens.map(i=>seguro(porId(i.id)?.nome||i.id)).join(', ')}</small></div>${o.estado==='Entregue'&&!o.devolucao?`<button class="botao botao-secundario" data-devolucao="${seguro(o.id)}">Solicitar devolucao</button>`:o.devolucao?`<span class="conta-status">${seguro(o.devolucao)}</span>`:''}</article>`).join('')}</section>
+      <section class="conta-bloco conta-reviews" id="conta-avaliacoes"><header class="conta-secao-cab"><div><p class="mono">SUA EXPERIÊNCIA</p><h2>Avaliações que você fez</h2></div><span>${avaliacoesCliente.length} publicadas</span></header><div class="conta-avaliacoes">${avaliacoesCliente.map(a=>{const p=porId(a.produtoId);return p?`<article class="conta-avaliacao"><a href="#p-${p.id}"><img src="${p.fotoLeve}" alt=""><span><strong>${seguro(p.nome)}</strong><small>${seguro(a.data)}</small></span></a><span class="avaliacao-estrelas" aria-label="${a.estrelas} de 5 estrelas">${'★'.repeat(a.estrelas)}${'☆'.repeat(5-a.estrelas)}</span><p>${seguro(a.texto)}</p></article>`:''}).join('')}</div></section>
+      <div class="conta-duas"><section class="conta-bloco" id="conta-favoritos"><header class="conta-secao-cab"><div><p class="mono">LISTA PESSOAL</p><h2>Seus favoritos</h2></div><span>${(perfilDemo.favoritos||[]).length} itens</span></header><div class="conta-favs">${(perfilDemo.favoritos||[]).map(id=>{const p=porId(id);return p?`<a href="#p-${p.id}"><img src="${p.fotoLeve}" alt=""><span>${seguro(p.nome)}</span></a>`:''}).join('')}</div></section><section class="conta-bloco" id="conta-enderecos"><header class="conta-secao-cab"><div><p class="mono">ENTREGA</p><h2>Endereço de entrega</h2></div></header>${(perfilDemo.enderecos||[]).map(e=>`<p><strong>${seguro(e.apelido)}</strong><br>${seguro(e.rua)}, ${seguro(e.numero)} - ${seguro(e.bairro)}<br>${seguro(e.cidade)} - ${seguro(e.uf)}, ${seguro(e.cep)}</p>`).join('')}<button type="button" class="link" data-editar-endereco>Adicionar endereço</button><div data-form-endereco hidden><input data-endereco-novo placeholder="Rua, número, bairro, cidade e CEP"><button type="button" class="botao" data-salvar-endereco>Salvar endereço</button></div></section></div>
       <section class="conta-bloco"><h2>Seus dados</h2><p>${seguro(perfilDemo.nome)} - ${seguro(perfilDemo.telefone||'')}</p><p>Pedidos e devolucoes sao demonstrativos. Prazo e status ilustram como a conta funciona.</p></section></section>`;
   }
   function telaPedido() {
@@ -2712,8 +2724,11 @@
       });
       Promise.all(arquivos.map(lerFoto)).then(fotos => {
         const dados = lerAvaliacoes(id);
-        dados.push({ nome: f.elements.nome.value.trim(), estrelas: Number(f.elements.estrelas.value), texto: f.elements.texto.value.trim(), fotos, data: new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium' }).format(new Date()) });
+        const novaAvaliacao = { nome: perfilDemo.nome, estrelas: Number(f.elements.estrelas.value), texto: f.elements.texto.value.trim(), fotos, data: new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium' }).format(new Date()) };
+        dados.push(novaAvaliacao);
         localStorage.setItem(chaveAvaliacoes(id), JSON.stringify(dados));
+        perfilDemo.avaliacoes = [...(perfilDemo.avaliacoes || []), { produtoId: id, estrelas: novaAvaliacao.estrelas, texto: novaAvaliacao.texto, data: novaAvaliacao.data }];
+        guardar('perfilDemo', perfilDemo);
         const p = porId(id); if (p) atualizarMetricasVariante(p, selDe(p).cor);
         const nova = document.createElement('template');
         nova.innerHTML = avaliacoesHTML(p);
