@@ -22,6 +22,10 @@ O CSS usa `rem`. A partir de 1181 px de largura, `html { font-size: calc(100vw /
 
 Sacola e cupom ficam no `localStorage` do próprio navegador. O pedido de demonstração fica apenas em memória; dados pessoais e dados de cartão não são persistidos nem enviados para um servidor. Uma loja real precisaria de API, validação no servidor, persistência e provedor de pagamento.
 
+## Conta de demonstracao
+
+A rota `#conta` abre um acesso opcional. O perfil de Sofia vem preenchido com endereco, favoritos, dois pedidos, prazos ilustrativos e um pedido elegivel para demonstrar devolucao. Perfis locais criados, sessao, favoritos, enderecos e pedidos simulados usam `localStorage`; nao ha banco, senha real, sincronizacao entre navegadores nem pagamento real. A pagina inicial continua sendo a loja.
+
 ## Rotas
 
-A navegação usa hash: `#inicio`, `#loja`, departamentos, `#estilo-*`, `#p-<produto>`, `#checkout` e `#pedido`.
+A navegação usa hash: `#inicio`, `#loja`, departamentos, `#estilo-*`, `#p-<produto>`, `#checkout`, `#pedido` e `#conta`.

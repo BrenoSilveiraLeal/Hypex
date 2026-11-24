@@ -741,3 +741,24 @@ section.dep.secao-arara { padding-top: 5.25rem; min-height: 0; color: var(--tint
   .dep-prateleira { padding-top: 8.375rem; min-height: 0; }
   .pdp-prateleira .compra { padding-top: 0.25rem; }
 }
+
+/* Conta demonstrativa */
+.topo-conta { text-decoration:none; padding-inline:.75rem; white-space:nowrap; }
+.conta-pagina { min-height:70vh; padding-block:8rem 5rem; color:var(--tinta-base); }
+.conta-pagina > .titulo { max-width:14ch; margin:.5rem 0 1rem; }
+.conta-login,.conta-duas { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1.5rem; margin:2rem 0; }
+.conta-login>div,.conta-bloco { padding:1.5rem; background:#fff; border:1px solid #dedbd4; }
+.conta-login label { display:grid; gap:.4rem; margin:.75rem 0; }
+.conta-login input,.conta-bloco input { min-height:2.8rem; padding:.7rem; border:1px solid #aaa; font:inherit; }
+.conta-cab { display:flex; justify-content:space-between; align-items:center; gap:1rem; }
+.conta-abas { display:flex; gap:1rem; overflow:auto; margin:2rem 0; padding-bottom:.75rem; border-bottom:1px solid #bbb; }
+.conta-abas a { color:inherit; white-space:nowrap; }
+.conta-bloco { margin:1rem 0; }
+.conta-pedido { display:flex; justify-content:space-between; align-items:center; gap:1rem; padding:1rem 0; border-top:1px solid #ddd; }
+.conta-pedido div { display:grid; gap:.4rem; }
+.conta-pedido span,.conta-pedido small { color:#676767; }
+.conta-favs { display:flex; flex-wrap:wrap; gap:1rem; }
+.conta-favs a { width:8rem; display:grid; gap:.5rem; color:inherit; text-decoration:none; }
+.conta-favs img { width:100%; aspect-ratio:1; object-fit:contain; background:#f4f2ef; }
+.conta-favoritar { width:100%; min-height:2.8rem; margin:.5rem 0; border:1px solid currentColor; background:transparent; font:inherit; cursor:pointer; }
+@media(max-width:700px){.conta-login,.conta-duas{grid-template-columns:1fr}.conta-pedido,.conta-cab{align-items:flex-start;flex-direction:column}.topo-conta{font-size:.75rem;min-width:2rem;padding-inline:.35rem}}

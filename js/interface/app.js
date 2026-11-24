@@ -684,7 +684,7 @@
       'Ficou confortável desde a primeira vez que usei. A entrega também foi rápida.'
     ]
   };
-  const nomesDemo = ['Marina S.', 'Caio R.', 'Lara M.', 'Joana P.', 'Renato F.', 'Felipe A.', 'Bia C.', 'Daniel V.', 'Lucas T.', 'Nina B.', 'Igor N.', 'Helena G.', 'Tainá L.', 'Rafa C.', 'Marcos D.', 'Pri S.', 'André B.', 'Cris F.', 'Luiza R.', 'Malu E.', 'Aline K.', 'Bruno T.', 'Sofia R.', 'Mateus P.', 'Júlia V.', 'Pedro M.'];
+  const nomesDemo = ['Marina S.', 'Caio R.', 'Lara M.', 'Joana P.', 'Renato F.', 'Felipe A.', 'Bia C.', 'Daniel V.', 'Lucas T.', 'Nina B.', 'Igor N.', 'Helena G.', 'Tainá L.', 'Rafa C.', 'Marcos D.', 'Pri S.', 'André B.', 'Cris F.', 'Luiza R.', 'Malu E.', 'Aline K.', 'Bruno T.', 'Camila R.', 'Mateus P.', 'Júlia V.', 'Pedro M.'];
   const datasDemo = ['22 de novembro de 2026', '17 de novembro de 2026', '12 de novembro de 2026', '6 de novembro de 2026', '28 de outubro de 2026', '21 de outubro de 2026', '14 de outubro de 2026', '8 de outubro de 2026'];
   const coresFotosDemo = {
     pesada: ['neve', 'grafite'], estampa: ['grafite', 'neve'], listrada: ['neve', 'arara'], polo: ['mata', 'vinho'], camisa: ['areia', 'neve'], regata: ['neve', 'grafite'], capuz: ['grafite', 'neve'], cargo: ['mata', 'areia'], alfaiatada: ['grafite', 'areia'], jeansreta: ['jeans', 'escuro'], jogger: ['grafite', 'cobalto'], shorts: ['areia', 'grafite'], saia: ['vinho', 'areia'], vestido: ['neve', 'turquesa'], vestidoliso: ['grafite', 'vinho'],
@@ -768,6 +768,7 @@
         ${blocoTam}
         <p class="erro" id="erro-tam" hidden>Escolha um tamanho para colocar na sacola.</p>
       </fieldset>
+      <button type="button" class="conta-favoritar" data-toggle-fav="${p.id}">${contaLogada && (perfilDemo.favoritos||[]).includes(p.id) ? "\u2665 Salvo nos favoritos" : "\u2661 Adicionar aos favoritos"}</button>
       <button type="submit" class="botao-sacola" id="adicionar" style="--i:5"><span><b id="adicionar-txt">Colocar na sacola</b><small>${R$(p.preco)} · ${parcelaTxt(p.preco)}</small></span><i>${icone('sacola')}</i></button>
       <button type="button" class="mostruario-abrir" data-mostruario-abrir aria-haspopup="dialog">${icone('girar')} Ver no modelo</button>
       ${p.dep === 'tenis' ? '' : `<details class="detalhes" style="--i:6"><summary>Detalhes da peça</summary><ul>${p.detalhes.map(x => `<li>${x}</li>`).join('')}</ul></details>
@@ -1601,6 +1602,7 @@
       </dl>`;
   }
   function telaCheckout() {
+    if (contaLogada && !S.ck.ent.cep && perfilDemo.enderecos?.length) { const a=perfilDemo.enderecos[0]; Object.assign(S.ck.ent,{cep:a.cep||'',rua:a.rua||'',num:a.numero||'',comp:a.complemento||'',bairro:a.bairro||'',cidade:a.cidade||'',uf:a.uf||''}); }
     if (!S.sacola.length) return `<section class="ck guia"><div class="vazio"><p class="titulo">Sua sacola está vazia.</p><a class="botao" href="#loja">Ver a loja</a></div></section>`;
     return `<section class="ck guia">
       <div class="ck-cab"><h1 class="titulo-dep">Finalizar compra</h1>
@@ -1633,6 +1635,7 @@
       entrega: N.frete === 'loja' ? 'Retirada na Hypex Centro' : `${N.rua}, ${N.num} · ${N.cidade}/${N.uf}`,
       prazo: op.prazo, email: S.ck.dados.email
     };
+    perfilDemo.pedidos.unshift({ id: S.pedido.numero, data: new Date().toLocaleDateString('pt-BR'), estado: 'Pedido confirmado', previsao: S.pedido.prazo, itens: S.pedido.itens, devolucao: '' }); guardar('perfilDemo', perfilDemo);
     S.sacola = []; S.cupom = null; S.cupomAviso = ''; S.cupomErro = ''; S.cupomDigitado = '';
     Object.assign(S.ck.pag, { num: '', titular: '', val: '', cvv: '', parc: 1 });
     S.ck.etapa = 1; S.ck.pixGerado = false; S.ck.recusa = ''; S.ck.erros = {};
@@ -1653,6 +1656,27 @@
       }
       concluirPedido();
     }, 1400);
+  }
+  const contaDemo = {
+    nome: 'Cliente', email: 'cliente@hypex.demo', telefone: '(11) 98888-1234',
+    enderecos: [{ id: 1, apelido: 'Casa', rua: 'Rua das Flores', numero: '100', complemento: 'Apto 12', bairro: 'Centro', cidade: 'Sao Paulo', uf: 'SP', cep: '01000-000' }],
+    favoritos: ['cometa', 'polo', 'saia', 'aurora'],
+    pedidos: [
+      { id: 'HYP-20489', data: '20 nov 2026', estado: 'Em transito', previsao: '27 a 29 nov 2026', itens: [{ id: 'pesada', qtd: 1, cor: 'neve', tam: 'M' }], devolucao: '' },
+      { id: 'HYP-19826', data: '08 nov 2026', estado: 'Entregue', previsao: 'Entregue em 13 nov 2026', itens: [{ id: 'cometa', qtd: 1, cor: 'areia', tam: '40' }, { id: 'alto', qtd: 2, cor: 'grafite', tam: '39-44' }], devolucao: '' }
+    ]
+  };
+  let perfilDemo = ler('perfilDemo', contaDemo);
+  if (['Sofia Martins', 'Marina Costa'].includes(perfilDemo.nome)) { perfilDemo.nome = contaDemo.nome; perfilDemo.email = contaDemo.email; guardar('perfilDemo', perfilDemo); }
+  let contaLogada = ler('contaLogada', false);
+  function telaConta() {
+    if (!contaLogada) return `<section class="conta-pagina guia"><p class="mono">SUA CONTA HYPEX</p><h1 class="titulo">Entre para acompanhar seus pedidos.</h1><p>Esta demonstracao salva as alteracoes neste navegador. Nenhuma compra ou pagamento real acontece.</p><div class="conta-login"><div><h2>Conta demonstrativa</h2><p>Cliente<br>${seguro(contaDemo.email)}</p><button class="botao" type="button" data-login-demo>Entrar como Cliente</button></div><div><h2>Ou criar perfil local</h2><label>Seu nome<input data-novo-nome autocomplete="name" placeholder="Como podemos te chamar?"></label><label>Seu e-mail<input data-novo-email type="email" autocomplete="email" placeholder="voce@email.com"></label><button class="botao botao-secundario" type="button" data-criar-perfil>Criar conta demonstrativa</button></div></div><a class="link" href="#inicio">Continuar vendo a loja</a></section>`;
+    const pedidos = perfilDemo.pedidos || [];
+    return `<section class="conta-pagina guia"><header class="conta-cab"><div><p class="mono">AREA DA CONTA &middot; DEMONSTRACAO</p><h1 class="titulo">Ola, ${seguro(perfilDemo.nome.split(' ')[0])}.</h1><p>${seguro(perfilDemo.email)} &middot; <span>Dados locais de demonstracao</span></p></div><button class="link-parede" type="button" data-sair-demo>Sair da conta</button></header>
+      <nav class="conta-abas"><a href="#conta">Visao geral</a><a href="#conta-pedidos">Pedidos (${pedidos.length})</a><a href="#conta-favoritos">Favoritos (${(perfilDemo.favoritos||[]).length})</a><a href="#conta-enderecos">Enderecos (${(perfilDemo.enderecos||[]).length})</a></nav>
+      <section class="conta-bloco"><h2>Proximas entregas</h2>${pedidos.map(o=>`<article class="conta-pedido"><div><strong>Pedido ${seguro(o.id)}</strong><span>${seguro(o.estado)} - ${seguro(o.previsao)}</span><small>${o.itens.map(i=>seguro(porId(i.id)?.nome||i.id)).join(', ')}</small></div>${o.estado==='Entregue'&&!o.devolucao?`<button class="botao botao-secundario" data-devolucao="${seguro(o.id)}">Solicitar devolucao</button>`:o.devolucao?`<span class="conta-status">${seguro(o.devolucao)}</span>`:''}</article>`).join('')}</section>
+      <div class="conta-duas"><section class="conta-bloco"><h2>Seus favoritos</h2><div class="conta-favs">${(perfilDemo.favoritos||[]).map(id=>{const p=porId(id);return p?`<a href="#p-${p.id}"><img src="${p.fotoLeve}" alt=""><span>${seguro(p.nome)}</span></a>`:''}).join('')}</div></section><section class="conta-bloco"><h2>Endereco de entrega</h2>${(perfilDemo.enderecos||[]).map(e=>`<p><strong>${seguro(e.apelido)}</strong><br>${seguro(e.rua)}, ${seguro(e.numero)} - ${seguro(e.bairro)}<br>${seguro(e.cidade)} - ${seguro(e.uf)}, ${seguro(e.cep)}</p>`).join('')}<button type="button" class="link" data-editar-endereco>Adicionar endereco</button><div data-form-endereco hidden><input data-endereco-novo placeholder="Rua, numero, bairro, cidade e CEP"><button type="button" class="botao" data-salvar-endereco>Salvar endereco</button></div></section></div>
+      <section class="conta-bloco"><h2>Seus dados</h2><p>${seguro(perfilDemo.nome)} - ${seguro(perfilDemo.telefone||'')}</p><p>Pedidos e devolucoes sao demonstrativos. Prazo e status ilustram como a conta funciona.</p></section></section>`;
   }
   function telaPedido() {
     const o = S.pedido;
@@ -2208,6 +2232,7 @@
     } else if (h.startsWith('p-') && porId(h.slice(2))) { const p = porId(h.slice(2)); html = telaProduto(p); titulo = `${p.nome} · Hypex`; }
     else if (h === 'checkout') html = telaCheckout();
     else if (h === 'pedido') html = telaPedido();
+    else if (h === 'conta' || h.startsWith('conta-')) { html = telaConta(); titulo = 'Minha conta - Hypex'; }
     else html = telaInicio();
     app.innerHTML = html;
     /* parede e arara carregam tudo de uma vez: as peças ficam prontas para deslizar */
@@ -2471,6 +2496,17 @@
     if ((el = c('[data-fb-limpar]'))) { const f = estadoFiltro(el.dataset.ns), antes = f.cor; f.publico = f.tam = f.cor = ''; if (el.dataset.ns === 'loja') { f.estilo = ''; f.promo = false; f.q = ''; } aplicarFiltro(el.dataset.ns, null, antes); return; }
     if ((el = c('[data-look]'))) { trocarLook(+el.dataset.look); return; }
     if ((el = c('[data-slide]'))) { trocarHero(+el.dataset.slide); const b = $(`[data-slide="${el.dataset.slide}"]`); if (b) b.focus(); iniciarTimerHero(); return; }
+    if ((el = c('[data-toggle-fav]'))) { if (!contaLogada) { location.hash = 'conta'; return; } const id=el.dataset.toggleFav, fav=perfilDemo.favoritos||[]; perfilDemo.favoritos=fav.includes(id)?fav.filter(x=>x!==id):[...fav,id]; guardar('perfilDemo',perfilDemo); el.textContent=perfilDemo.favoritos.includes(id)?'\u2665 Salvo nos favoritos':'\u2661 Adicionar aos favoritos'; return; }
+    if ((el = c('[data-login-demo]'))) { contaLogada = true; guardar('contaLogada', true); desenharRota(false); return; }
+    if ((el = c('[data-criar-perfil]'))) {
+      const nome = $('[data-novo-nome]')?.value.trim(), email = $('[data-novo-email]')?.value.trim();
+      if (!nome || !email) { toast('Preencha seu nome e e-mail.'); return; }
+      perfilDemo = { nome, email, telefone: '', enderecos: [], favoritos: [], pedidos: [] }; guardar('perfilDemo', perfilDemo); contaLogada = true; guardar('contaLogada', true); desenharRota(false); return;
+    }
+    if (c('[data-sair-demo]')) { contaLogada = false; guardar('contaLogada', false); desenharRota(false); return; }
+    if ((el = c('[data-devolucao]'))) { const p = perfilDemo.pedidos.find(x => x.id === el.dataset.devolucao); if (p) { p.devolucao = 'Solicitacao de devolucao registrada'; guardar('perfilDemo', perfilDemo); desenharRota(false); } return; }
+    if (c('[data-editar-endereco]')) { const f = $('[data-form-endereco]'); if(f) f.hidden = false; return; }
+    if (c('[data-salvar-endereco]')) { const v = $('[data-endereco-novo]')?.value.trim(); if(!v){toast('Informe o endereco.');return;} perfilDemo.enderecos.push({id:Date.now(),apelido:'Novo endereco',rua:v,numero:'',bairro:'',cidade:'',uf:'',cep:''}); guardar('perfilDemo',perfilDemo); desenharRota(false); return; }
     if (c('#btn-sacola')) { abrirSacola(); return; }
     if (c('[data-fechar-sacola]') || c('#sombra')) { fecharSacola(); return; }
     if (c('[data-fecha-sacola]')) fecharSacola();
