@@ -99,7 +99,7 @@ fieldset { border: 0; min-width: 0; }
 @keyframes pulo { 0% { transform: scale(1); } 30% { transform: scale(1.18) rotate(-4deg); } 100% { transform: scale(1); } }
 
 /* HERO: palavra gigante atrás da peça */
-.hero { position: relative; overflow: hidden; background: var(--fundo); color: var(--tinta); min-height: max(38.75rem, 88vh); display: grid; transition: background-color .6s; isolation: isolate; }
+.hero { position: relative; overflow: hidden; background: var(--fundo); color: var(--tinta); min-height: max(38.75rem, 100vh); min-height: max(38.75rem, 100svh); display: grid; transition: background-color .6s; isolation: isolate; }
 .hero::after, .parede::after, .pdp::after { content: ""; position: absolute; inset: 0; background-image: var(--grao); opacity: .14; mix-blend-mode: soft-light; pointer-events: none; z-index: -1; }
 [data-prof] { transform: translate(var(--tx, 0), var(--ty, 0)); transition: transform .5s cubic-bezier(.2, .7, .3, 1); }
 .hero-palavra { position: absolute; left: 0; right: 0; top: 6rem; text-align: center; font-family: var(--largo); font-weight: 900; line-height: .9; letter-spacing: -.04em; white-space: nowrap; font-size: calc(92vw / (var(--n) * .83)); color: color-mix(in srgb, #FFFFFF 30%, var(--fundo)); z-index: 0; user-select: none; }
@@ -475,7 +475,7 @@ input:not([type="radio"]):focus { outline: none; border-color: var(--azul); box-
   .topo { height: auto; flex-wrap: wrap; padding: 0.5rem 0.5rem 0.5rem 0.875rem; gap: 0.25rem 0.5rem; margin-bottom: -7rem; }
   .topo-deps { order: 3; width: 100%; margin: 0; }
   .topo-acoes { margin-left: auto; }
-  .hero { min-height: 0; display: flex; flex-direction: column; padding-top: 7.375rem; padding-bottom: 1.25rem; gap: 1rem; }
+  .hero { min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column; padding-top: 7.375rem; padding-bottom: 1.25rem; gap: 1rem; }
   .hero-palavra { top: 7.75rem; }
   .hero-mira { display: none; }
   .hero-peca { position: relative; left: auto; top: auto; bottom: auto; margin: 0 auto; width: min(82vw, 28.75rem); height: min(88vw, 30rem); }
